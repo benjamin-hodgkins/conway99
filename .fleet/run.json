@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "command",
+            "name": "Command configuration",
+            "program": "$USER_HOME$\\AppData\\Local\\Programs\\Julia-1.9.0\\bin\\julia.exe",
+        },
+        
+    ]
+}

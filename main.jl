@@ -44,11 +44,11 @@ function verifyProperties(graph, vertices)
         numNeighbors = length(common[entry][3])
         if edge && numNeighbors == 1
             continue
-        elseif !edge && numNeighbors == 2    
+        elseif !edge && numNeighbors == 2       
             continue
         else
-            print(entry)
-            println(" Graph failed checks")S
+            #print("Graph failed checks: ")
+            #println(entry)
             return false
          end
          
@@ -56,23 +56,38 @@ function verifyProperties(graph, vertices)
     println("Graph passed checks!")
     return true
 end
+
+function bruteForce(vertices, degree, iterations)
+    #Experimental multithreading
+    Threads.@threads for i in range(1, iterations)
+        g = random_regular_graph(vertices, degree, seed=i)
+        #println("Random graph: ")
+        if verifyProperties(g, vertices) == true
+            fName = "Winner! Seed - " * string(seed) * (".lgz")
+            savegraph(fName, g)
+            graphplot(g, method=:shell, nodesize=0.3, curves=false)
+            return true
+        end 
+    end
+    return false 
+end
+
 #The graph should have 99 vertices
 #the graph is a regular graph with 14 edges per vertex.
 #every pair of adjacent vertices should have 1 common neighbor, 
 #and every pair of non-adjacent vertices should have 2 common neighbors. 
+
 function main()
+    #TODO https://codingnest.com/modern-sat-solvers-fast-neat-and-underused-part-3-of-n/
+    #TODO https://cuda.juliagpu.org/stable/tutorials/introduction/
     paley = SimpleGraph(paley9()) 
     V = 99
     E = 14
-    g = random_regular_graph(V, E)
-
-    println("Paley: ")
-    verifyProperties(paley, 9)
-    println("Random 14-degree graph: ")
-    @assert verifyProperties(g, V) == false
-
-    # Plot paley graph
-    #graphplot(paley, method=:shell, names=1:9, nodesize=0.3, curves=false)
+    #Force precompilation
+    @time bruteForce(99, 14, 1)
+    #TODO Set threads for Julia
+    @time bruteForce(99, 14, 1000)
+    
 end
 #activate conway99
 main()

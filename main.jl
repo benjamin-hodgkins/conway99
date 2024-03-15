@@ -18,10 +18,10 @@ function paley9()
     return adj_mat
 end
 
-#Print common neighbors 
+#Find common neighbors 
 function commonNeighbors(graph, vertices)
     common = []
-    println("Common neighbors:")
+    #println("Common neighbors:")
     for i in range(1,vertices)
         #println(all_neighbors(paley, i))
         for j in range(i+1,vertices)
@@ -29,12 +29,32 @@ function commonNeighbors(graph, vertices)
                 continue
             end
             neighbors = common_neighbors(graph, i, j)
-            #TODO Make it work for vertices with 2 common neighbors
-            if
-            push!(common, [i, j, ])
+            push!(common, [i, j, neighbors])
         end
     end
     return common
+end
+
+#Verify common neighbor properties
+function verifyProperties(graph, vertices)
+    common = commonNeighbors(graph, vertices)
+    
+    for entry in common
+        edge = has_edge(graph, entry[1], entry[2])
+        numNeighbors = length(common[entry][3])
+        if edge && numNeighbors == 1
+            continue
+        elseif !edge && numNeighbors == 2    
+            continue
+        else
+            print(entry)
+            println(" Graph failed checks")S
+            return false
+         end
+         
+    end
+    println("Graph passed checks!")
+    return true
 end
 #The graph should have 99 vertices
 #the graph is a regular graph with 14 edges per vertex.
@@ -42,18 +62,14 @@ end
 #and every pair of non-adjacent vertices should have 2 common neighbors. 
 function main()
     paley = SimpleGraph(paley9()) 
-    common = commonNeighbors(paley, 9)
+    V = 99
+    E = 14
+    g = random_regular_graph(V, E)
 
-    #TODO adjacent vertices have 1 neighbor, non-adjacent have 2
-    #https://juliagraphs.org/Graphs.jl/dev/first_steps/access/
-    for entry in common
-        if has_edge(paley, entry[1], entry[2])
-            #TODO 
-            println(entry)
-            
-        end 
-        
-    end
+    println("Paley: ")
+    verifyProperties(paley, 9)
+    println("Random 14-degree graph: ")
+    @assert verifyProperties(g, V) == false
 
     # Plot paley graph
     #graphplot(paley, method=:shell, names=1:9, nodesize=0.3, curves=false)

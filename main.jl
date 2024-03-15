@@ -1,6 +1,7 @@
 
 using Graphs, GraphRecipes, Plots
 using JET, BenchmarkTools, Profile
+using CUDA
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
 function paley9()
     
@@ -20,17 +21,14 @@ end
 
 #Find common neighbors of all vertices
 function commonNeighbors(graph, vertices, degree)
-    #TODO Make this explicitly typed, preallocate array
-    common = []#Vector{Any}(undef, vertices * 2)
-    #println("Common neighbors:")
+    common = Vector{Any}(undef, (degree + 2) * vertices)
     for i in range(1,vertices)
-        #println(all_neighbors(paley, i))
         for j in range(i+1,vertices)
             if i == j
                 continue
             end
 
-            neighbors = common_neighbors(graph, i, j) #TODO Rewrite?  
+            neighbors = common_neighbors(graph, i, j)  
             edge = has_edge(graph, i, j)
             numNeighbors = length(neighbors)
 
@@ -46,13 +44,11 @@ end
 
 function bruteForce(vertices, degree, iterations)
     #Experimental multithreading
-    Theads.@threads for i in range(1, iterations)
-        g = random_regular_graph(vertices, degree, seed=i)
-        #println("Random graph: ")
+     Threads.@threads for i in range(1, iterations)
+        g = random_regular_graph(vertices, degree, seed=i) #TODO Bottleneck
         if commonNeighbors(g, vertices, degree) == true
-            fName = "Winner! Seed - " * string(seed) * (".lgz")
+            fName = "Winner! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
-            graphplot(g, method=:shell, nodesize=0.3, curves=false)
             return true
         end 
     end
@@ -70,10 +66,16 @@ function main()
     paley = SimpleGraph(paley9()) 
     V = 99
     E = 14
+    I = 10000
+    bruteForce(V, E, 1)
+    @time bruteForce(V, E, I)
+    #@profview bruteForce(V, E, I)  
+    #print(CUDA.versioninfo())
 
-    bruteForce(V, E, 10)
-    @time bruteForce(V, E, 75000)
-
+    if isfile("Winner! Seed - 19.lgz")
+        g = loadgraph("Winner! Seed - 19.lgz")
+        graphplot(g, method=:shell, nodesize=0.3, curves=false)
+    end
 end
 #activate conway99
 main()

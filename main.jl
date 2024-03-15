@@ -18,11 +18,10 @@ function paley9()
     return adj_mat
 end
 
-#Find common neighbors 
+#Find common neighbors of all vertices
 function commonNeighbors(graph, vertices, degree)
-    #TODO Make this explicitly typed
+    #TODO Make this explicitly typed, preallocate array
     common = []#Vector{Any}(undef, vertices * 2)
-    temp = 0
     #println("Common neighbors:")
     for i in range(1,vertices)
         #println(all_neighbors(paley, i))
@@ -31,53 +30,26 @@ function commonNeighbors(graph, vertices, degree)
                 continue
             end
 
-            neighbors = common_neighbors(graph, i, j) #TODO Rewrite?
-            temp = length(neighbors)
-            #TODO  
-            #edge = has_edge(graph, entry[1], entry[2])
-            #numNeighbors = length(common[entry][3])
+            neighbors = common_neighbors(graph, i, j) #TODO Rewrite?  
+            edge = has_edge(graph, i, j)
+            numNeighbors = length(neighbors)
 
-           # if numNeighbors == 1 && edge  
-           #     continue
-            #elseif numNeighbors == 2 && !edge        
-            #    continue
-
-            push!(common, [i, j, neighbors])
+            if numNeighbors == 1 && edge || numNeighbors == 2 && !edge   
+                push!(common, [i, j, neighbors])
+            else
+                return false
+            end
         end
     end
-    print(temp)
-    return common
-end
-
-#Verify common neighbor properties
-#TODO Refactor, put into common neighbors 
-function verifyProperties(graph, vertices, degree)
-    common = commonNeighbors(graph, vertices, degree)
-    
-    for entry in common
-        edge = has_edge(graph, entry[1], entry[2])
-        numNeighbors = length(common[entry][3])
-        if edge && numNeighbors == 1
-            continue
-        elseif !edge && numNeighbors == 2       
-            continue
-        else
-            #print("Graph failed checks: ")
-            #println(entry)
-            return false
-         end
-         
-    end
-    println("Graph passed checks!")
     return true
 end
 
 function bruteForce(vertices, degree, iterations)
     #Experimental multithreading
-    Threads.@threads for i in range(1, iterations)
+    Theads.@threads for i in range(1, iterations)
         g = random_regular_graph(vertices, degree, seed=i)
         #println("Random graph: ")
-        if verifyProperties(g, vertices, degree) == true
+        if commonNeighbors(g, vertices, degree) == true
             fName = "Winner! Seed - " * string(seed) * (".lgz")
             savegraph(fName, g)
             graphplot(g, method=:shell, nodesize=0.3, curves=false)
@@ -100,8 +72,7 @@ function main()
     E = 14
 
     bruteForce(V, E, 10)
-    @time bruteForce(V, E, 100)
-    #@profview bruteForce(V, E, 100)
+    @time bruteForce(V, E, 75000)
 
 end
 #activate conway99

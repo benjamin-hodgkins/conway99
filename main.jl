@@ -1,6 +1,6 @@
 
 using Graphs, GraphRecipes, Plots
-
+using JET, BenchmarkTools, Profile
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
 function paley9()
     
@@ -19,8 +19,10 @@ function paley9()
 end
 
 #Find common neighbors 
-function commonNeighbors(graph, vertices)
-    common = []
+function commonNeighbors(graph, vertices, degree)
+    #TODO Make this explicitly typed
+    common = []#Vector{Any}(undef, vertices * 2)
+    temp = 0
     #println("Common neighbors:")
     for i in range(1,vertices)
         #println(all_neighbors(paley, i))
@@ -28,16 +30,29 @@ function commonNeighbors(graph, vertices)
             if i == j
                 continue
             end
-            neighbors = common_neighbors(graph, i, j)
+
+            neighbors = common_neighbors(graph, i, j) #TODO Rewrite?
+            temp = length(neighbors)
+            #TODO  
+            #edge = has_edge(graph, entry[1], entry[2])
+            #numNeighbors = length(common[entry][3])
+
+           # if numNeighbors == 1 && edge  
+           #     continue
+            #elseif numNeighbors == 2 && !edge        
+            #    continue
+
             push!(common, [i, j, neighbors])
         end
     end
+    print(temp)
     return common
 end
 
 #Verify common neighbor properties
-function verifyProperties(graph, vertices)
-    common = commonNeighbors(graph, vertices)
+#TODO Refactor, put into common neighbors 
+function verifyProperties(graph, vertices, degree)
+    common = commonNeighbors(graph, vertices, degree)
     
     for entry in common
         edge = has_edge(graph, entry[1], entry[2])
@@ -62,7 +77,7 @@ function bruteForce(vertices, degree, iterations)
     Threads.@threads for i in range(1, iterations)
         g = random_regular_graph(vertices, degree, seed=i)
         #println("Random graph: ")
-        if verifyProperties(g, vertices) == true
+        if verifyProperties(g, vertices, degree) == true
             fName = "Winner! Seed - " * string(seed) * (".lgz")
             savegraph(fName, g)
             graphplot(g, method=:shell, nodesize=0.3, curves=false)
@@ -83,11 +98,11 @@ function main()
     paley = SimpleGraph(paley9()) 
     V = 99
     E = 14
-    #Force precompilation
-    @time bruteForce(99, 14, 1)
-    #TODO Set threads for Julia
-    @time bruteForce(99, 14, 1000)
-    
+
+    bruteForce(V, E, 10)
+    @time bruteForce(V, E, 100)
+    #@profview bruteForce(V, E, 100)
+
 end
 #activate conway99
 main()

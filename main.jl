@@ -21,14 +21,18 @@ end
 
 #Find common neighbors of all vertices
 function commonNeighbors(graph, vertices, degree)
-    common = Vector{Any}(undef, (degree + 2) * vertices)
+    common = Vector{Any}(undef, (degree + 2) * vertices) 
+    if CUDA.functional()
+        common = CuArray{Int}(undef, (degree + 2) * vertices) #TODo Work on GPU?
+    end  
+    print(typeof(common))
     for i in range(1,vertices)
         for j in range(i+1,vertices)
             if i == j
                 continue
             end
 
-            neighbors = common_neighbors(graph, i, j)  
+            neighbors = common_neighbors(graph, i, j)  #TODO Make into Vector{Int}
             edge = has_edge(graph, i, j)
             numNeighbors = length(neighbors)
 

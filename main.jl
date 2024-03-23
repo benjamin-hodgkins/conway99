@@ -19,21 +19,19 @@ function paley9()
     return adj_mat
 end
 
-#Find common neighbors of all vertices
-function commonNeighborsCPU(graph, vertices, degree)
-    common = []
+#Checks properties of graph v1
+function check(graph, vertices)
     for i in range(1,vertices)
         for j in range(i+1,vertices)
             if i == j
                 continue
             end
-
             neighbors = common_neighbors(graph, i, j)
             edge = has_edge(graph, i, j)
             numNeighbors = length(neighbors)
 
             if numNeighbors == 1 && edge || numNeighbors == 2 && !edge   
-                push!(common, [i, j, neighbors])
+                continue
             else
                 return false
             end
@@ -42,11 +40,29 @@ function commonNeighborsCPU(graph, vertices, degree)
     return true
 end
 
-function bruteForceCPU(vertices, degree, start, finish)
+#Checks properties of graph v2
+function check2(graph)
+    adj_mat = adjacency_matrix(graph)
+    num_neigh_mat = transpose(adj_mat) * adj_mat #Transpose isn't needed since matrix is square and symmetrical on the diagonal
+    for i in range(1, length(adj_mat))
+        if num_neigh_mat[i] == 4
+            continue
+        elseif adj_mat[i] == 1 && num_neigh_mat[i] == 1
+            continue
+        elseif adj_mat[i] == 0 && num_neigh_mat[i] == 2
+            continue
+        else
+            return false
+        end
+    end
+    return true   
+end
+
+function bruteForce(vertices, degree, start, finish)
     #Multithreading
     Threads.@threads for i in range(start, finish)
         g = random_regular_graph(vertices, degree, seed=i) #TODO Bottleneck
-        if commonNeighborsCPU(g, vertices, degree) == true
+        if check(g, vertices) == true
             fName = "Winner! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
             return true
@@ -55,20 +71,17 @@ function bruteForceCPU(vertices, degree, start, finish)
     return false 
 end
 
-#Find common neighbors of all vertices (runs on GPU)
-#TODO Create custom graph generator
-function commonNeighborsGPU(graph, vertices, degree)
-
-    adj_mat = BitArray(undef, vertices, vertices)
-
-    neigh_mat = transpose(graph) * graph
-    
-    
-    #For each vertex pair, skipping loops
-    #Get whether an edge exists
-    #Get their common neighbors DONE
-    #Get the number of neighbors
-    
+function bruteForce2(vertices, degree, start, finish)
+    #Multithreading
+    Threads.@threads for i in range(start, finish)
+        g = random_regular_graph(vertices, degree, seed=i) #TODO Bottleneck
+        if check2(g) == true
+            fName = "Winner! Seed - " * string(i) * (".lgz")
+            savegraph(fName, g)
+            return true
+        end 
+    end
+    return false 
 end
 
 #The graph should have 99 vertices
@@ -76,27 +89,28 @@ end
 #every pair of adjacent vertices should have 1 common neighbor, 
 #and every pair of non-adjacent vertices should have 2 common neighbors. 
 function main()
-    #TODO https://codingnest.com/modern-sat-solvers-fast-neat-and-underused-part-3-of-n/
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
+    #TODO Create custom graph generator
+    #TODO Pass adjacency_matrix directly to check2()
     paley = paley9()
-    V = 9
-    D = 4
+    V = 99
+    D = 14
     start  = 0
     finish = 10000
     
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
-    commonNeighborsGPU(paley, V, D)
-    @time commonNeighborsGPU(paley, V, D)
-    #print(adjacency_matrix(paley))
     
-    #bruteForceCPU(V, D, 1, 2)
-    #@time bruteForceCPU(V, D, start, finish) #Searched up to 20,000,000
-    #@profview bruteForce(V, E, I)  
+    bruteForce(V, D, 1, 2)
+    @btime bruteForce($V, $D, $start, $finish)
 
-    if isfile("Winner! Seed - 19.lgz")
-        g = loadgraph("Winner! Seed - 19.lgz")
-        graphplot(g, method=:shell, nodesize=0.3, curves=false)
-    end
+    bruteForce2(V, D, 1, 2)
+    @btime bruteForce2($V, $D, $start, $finish)
+
+
+    #if isfile("Winner! Seed - 19.lgz")
+        #g = loadgraph("Winner! Seed - 19.lgz")
+        #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
+    #end
 end
 main()

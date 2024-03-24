@@ -43,7 +43,7 @@ end
 #Checks properties of graph v2
 function check2(graph)
     adj_mat = adjacency_matrix(graph)
-    num_neigh_mat = transpose(adj_mat) * adj_mat #Transpose isn't needed since matrix is square and symmetrical on the diagonal
+    num_neigh_mat = transpose(adj_mat) * adj_mat
     for i in range(1, length(adj_mat))
         if num_neigh_mat[i] == 4
             continue
@@ -58,6 +58,13 @@ function check2(graph)
     return true   
 end
 
+function generateGraph(vertices, degree)
+    adj_mat = BitMatrix(undef, vertices, vertices)
+    #display(adj_mat)
+
+    #TODO Iterate over matrix, add (degree) number of edges to each row
+    # https://docs.julialang.org/en/v1/base/arrays/#Broadcast-and-vectorization
+end
 function bruteForce(vertices, degree, start, finish)
     #Multithreading
     Threads.@threads for i in range(start, finish)
@@ -96,18 +103,18 @@ function main()
     V = 99
     D = 14
     start  = 0
-    finish = 10000
+    finish = 1000
     
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     bruteForce(V, D, 1, 2)
-    @btime bruteForce($V, $D, $start, $finish)
+    @time bruteForce(V, D, start, finish)
 
     bruteForce2(V, D, 1, 2)
-    @btime bruteForce2($V, $D, $start, $finish)
+    @time bruteForce2(V, D, start, finish)
 
-
+    generateGraph(V, D)
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

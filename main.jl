@@ -41,8 +41,8 @@ function check(graph, vertices)
 end
 
 #Checks properties of graph v2
-function check2(graph)
-    adj_mat = adjacency_matrix(graph)
+function check2(adj_mat)
+    #adj_mat = adjacency_matrix(graph)
     num_neigh_mat = transpose(adj_mat) * adj_mat
     for i in range(1, length(adj_mat))
         if num_neigh_mat[i] == 4
@@ -59,11 +59,14 @@ function check2(graph)
 end
 
 function generateGraph(vertices, degree)
-    adj_mat = BitMatrix(undef, vertices, vertices)
-    #display(adj_mat)
 
     #TODO Iterate over matrix, add (degree) number of edges to each row
+    #TODO Make graph symmetrial over diagonal
     # https://docs.julialang.org/en/v1/base/arrays/#Broadcast-and-vectorization
+    adj_mat = Array{Bool}(undef, vertices, vertices) 
+    
+    return adj_mat
+
 end
 function bruteForce(vertices, degree, start, finish)
     #Multithreading
@@ -98,23 +101,24 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
-    #TODO Pass adjacency_matrix directly to check2()
     paley = paley9()
-    V = 99
-    D = 14
+    V = 9
+    D = 4
     start  = 0
     finish = 1000
     
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
-    bruteForce(V, D, 1, 2)
-    @time bruteForce(V, D, start, finish)
+    #bruteForce(V, D, 1, 2)
+    #@time bruteForce(V, D, start, finish)
 
-    bruteForce2(V, D, 1, 2)
-    @time bruteForce2(V, D, start, finish)
+    #bruteForce2(V, D, 1, 2)
+    #@time bruteForce2(V, D, start, finish)
 
-    generateGraph(V, D)
+    g2 = generateGraph(V, D)
+    @btime check2($g2)
+    @btime random_regular_graph($V, $D)
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

@@ -58,13 +58,35 @@ function check2(adj_mat)
     return true   
 end
 
+#Generates all possible bitstrings of (vertices) length and saves to file
+#TODO Runs out of memory
+function generateLookupTable(vertices, degree)
+    combinations = reverse.(Iterators.product(fill(0:1,vertices)...))[:] #Produces all bitstrings of length (vertices)
+    #TODO Produce only bitstrings with (degree) 1's
+
+    open("Lookup Table.bin", "w") do file
+        write(file, combinations)
+    end
+end
+
+#Generates a (99, 14) graph deterministically
 function generateGraph(vertices, degree)
+    
+    if !isfile("Lookup Table.bin")
+        generateLookupTable(vertices, degree)
+    end
 
     #TODO Iterate over matrix, add (degree) number of edges to each row
+            #Generate lookup table?
     #TODO Make graph symmetrial over diagonal
     # https://docs.julialang.org/en/v1/base/arrays/#Broadcast-and-vectorization
     adj_mat = Array{Bool}(undef, vertices, vertices) 
+
+    #for i in eachindex(adj_mat)
+        
+    #end
     
+    test = transpose(adj_mat) + adj_mat
     return adj_mat
 
 end
@@ -102,7 +124,7 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 9
+    V = 20
     D = 4
     start  = 0
     finish = 1000
@@ -115,10 +137,10 @@ function main()
 
     #bruteForce2(V, D, 1, 2)
     #@time bruteForce2(V, D, start, finish)
-
-    g2 = generateGraph(V, D)
-    @btime check2($g2)
-    @btime random_regular_graph($V, $D)
+    generateLookupTable(2, 2)
+    @time generateLookupTable(V, D)
+    #@time check2(g2)
+    #@time random_regular_graph(V, D)
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

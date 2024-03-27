@@ -58,24 +58,11 @@ function check2(adj_mat)
     return true   
 end
 
-#Generates all possible bitstrings of (vertices) length and saves to file
-#TODO Runs out of memory
-function generateLookupTable(vertices, degree)
-    combinations = reverse.(Iterators.product(fill(0:1,vertices)...))[:] #Produces all bitstrings of length (vertices)
-    #TODO Produce only bitstrings with (degree) 1's
-
-    open("Lookup Table.bin", "w") do file
-        write(file, combinations)
-    end
-end
-
 #Generates a (99, 14) graph deterministically
+#TODO Trying to make lookup table of all 99-length bitstrings, might not work
+#https://discourse.julialang.org/t/cleanest-way-to-generate-all-combinations-of-n-arrays/20127/7
 function generateGraph(vertices, degree)
     
-    if !isfile("Lookup Table.bin")
-        generateLookupTable(vertices, degree)
-    end
-
     #TODO Iterate over matrix, add (degree) number of edges to each row
             #Generate lookup table?
     #TODO Make graph symmetrial over diagonal

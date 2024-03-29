@@ -62,9 +62,11 @@ end
 function generateGraph(vertices, degree)
     
     #TODO Iterate over matrix, add (degree) number of edges to each row
+    #TODO Seed function with 2^vertices number
     # https://docs.julialang.org/en/v1/base/arrays/#Broadcast-and-vectorization
     adj_mat = zeros(Bool, vertices, vertices)
 
+    #TODO Algorithm: for each row in matrix, calculate bitstring of number from 1-2^vertices where ones == degree
     for row in eachrow(adj_mat)
         num_placed = 0
         for entry in eachindex(row)
@@ -77,7 +79,6 @@ function generateGraph(vertices, degree)
         end
     end
     
-    #full = transpose(adj_mat) + adj_mat
     return adj_mat
 
 end
@@ -123,15 +124,16 @@ function main()
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
-    #bruteForce(V, D, 1, 2)
+    #Compare brute force methods
     #@time bruteForce(V, D, start, finish)
-
-    #bruteForce2(V, D, 1, 2)
     #@time bruteForce2(V, D, start, finish)
-    #generateGraph(2, 2)
-    @time generateGraph(V, D)
+
+    #Compare graph generation 
+    @btime generateGraph($V, $D)
     #@time check2(g2)
-    #@time random_regular_graph(V, D)
+    @btime random_regular_graph($V, $D)
+
+
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

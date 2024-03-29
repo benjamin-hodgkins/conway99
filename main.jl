@@ -59,21 +59,25 @@ function check2(adj_mat)
 end
 
 #Generates a (99, 14) graph deterministically
-#TODO Trying to make lookup table of all 99-length bitstrings, might not work
-#https://discourse.julialang.org/t/cleanest-way-to-generate-all-combinations-of-n-arrays/20127/7
 function generateGraph(vertices, degree)
     
     #TODO Iterate over matrix, add (degree) number of edges to each row
-            #Generate lookup table?
-    #TODO Make graph symmetrial over diagonal
     # https://docs.julialang.org/en/v1/base/arrays/#Broadcast-and-vectorization
-    adj_mat = Array{Bool}(undef, vertices, vertices) 
+    adj_mat = zeros(Bool, vertices, vertices)
 
-    #for i in eachindex(adj_mat)
-        
-    #end
+    for row in eachrow(adj_mat)
+        num_placed = 0
+        for entry in eachindex(row)
+            if num_placed == degree
+                num_placed = 0
+                break
+            end
+            row[entry] = true
+            num_placed += 1
+        end
+    end
     
-    test = transpose(adj_mat) + adj_mat
+    #full = transpose(adj_mat) + adj_mat
     return adj_mat
 
 end
@@ -111,7 +115,7 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 20
+    V = 9
     D = 4
     start  = 0
     finish = 1000
@@ -124,8 +128,8 @@ function main()
 
     #bruteForce2(V, D, 1, 2)
     #@time bruteForce2(V, D, start, finish)
-    generateLookupTable(2, 2)
-    @time generateLookupTable(V, D)
+    #generateGraph(2, 2)
+    @time generateGraph(V, D)
     #@time check2(g2)
     #@time random_regular_graph(V, D)
     #if isfile("Winner! Seed - 19.lgz")

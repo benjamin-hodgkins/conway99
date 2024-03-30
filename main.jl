@@ -60,23 +60,16 @@ end
 
 #Generates a (99, 14) graph deterministically
 function generateGraph(vertices, degree)
-    
-    #TODO Iterate over matrix, add (degree) number of edges to each row
-    #TODO Seed function with 2^vertices number
-    # https://docs.julialang.org/en/v1/base/arrays/#Broadcast-and-vectorization
+
     adj_mat = zeros(Bool, vertices, vertices)
 
+
     #TODO Algorithm: for each row in matrix, calculate bitstring of number from 1-2^vertices where ones == degree
+    # https://stackoverflow.com/questions/1851134/generate-all-binary-strings-of-length-n-with-k-bits-set/2075867#2075867
+    # https://discourse.julialang.org/t/ann-bitpermutations-jl-efficient-routines-for-repeated-bit-permutations/93312
     for row in eachrow(adj_mat)
-        num_placed = 0
-        for entry in eachindex(row)
-            if num_placed == degree
-                num_placed = 0
-                break
-            end
-            row[entry] = true
-            num_placed += 1
-        end
+        row = bitstring(rand(1:2^vertices)) #TODO Truncate to vertices length
+        #println(seed)
     end
     
     return adj_mat
@@ -129,9 +122,10 @@ function main()
     #@time bruteForce2(V, D, start, finish)
 
     #Compare graph generation 
-    @btime generateGraph($V, $D)
+    generateGraph(V, D)
+    #@btime generateGraph($V, $D)
     #@time check2(g2)
-    @btime random_regular_graph($V, $D)
+    #@btime random_regular_graph($V, $D)
 
 
     #if isfile("Winner! Seed - 19.lgz")

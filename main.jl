@@ -1,5 +1,5 @@
 using Graphs, GraphRecipes, Plots
-using JET, BenchmarkTools, Profile
+using BenchmarkTools, Profile
 using CUDA
 
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
@@ -42,14 +42,11 @@ end
 
 #Checks properties of graph v2
 function check2(adj_mat)
-    #adj_mat = adjacency_matrix(graph)
     num_neigh_mat = transpose(adj_mat) * adj_mat
     for i in range(1, length(adj_mat))
         if num_neigh_mat[i] == 4
             continue
-        elseif adj_mat[i] == 1 && num_neigh_mat[i] == 1
-            continue
-        elseif adj_mat[i] == 0 && num_neigh_mat[i] == 2
+        elseif adj_mat[i] == 1 && num_neigh_mat[i] == 1 || adj_mat[i] == 0 && num_neigh_mat[i] == 2
             continue
         else
             return false
@@ -58,20 +55,17 @@ function check2(adj_mat)
     return true   
 end
 
-#Generates a (99, 14) graph deterministically
-function generateGraph(vertices, degree)
+#Makes random bitstring of length vertices based on seed
+function makeRow(vertices, seed)
+    return [last(digits(base=2, rand(1:2^vertices), pad = vertices), vertices)] #TODO Have only degree ones, no loops
+end
+#Generates a (99, 14) graph 
+function generateGraph(vertices, degree, seed)
 
-    adj_mat = zeros(Bool, vertices, vertices)
-
-
-    #TODO Algorithm: for each row in matrix, calculate bitstring of number from 1-2^vertices where ones == degree
+    adj_mat = [makeRow(vertices, seed) for i in 1:vertices]
     # https://stackoverflow.com/questions/1851134/generate-all-binary-strings-of-length-n-with-k-bits-set/2075867#2075867
     # https://discourse.julialang.org/t/ann-bitpermutations-jl-efficient-routines-for-repeated-bit-permutations/93312
-    for row in eachrow(adj_mat)
-        row = bitstring(rand(1:2^vertices)) #TODO Truncate to vertices length
-        #println(seed)
-    end
-    
+
     return adj_mat
 
 end
@@ -91,7 +85,7 @@ end
 function bruteForce2(vertices, degree, start, finish)
     #Multithreading
     Threads.@threads for i in range(start, finish)
-        g = random_regular_graph(vertices, degree, seed=i) #TODO Bottleneck
+        g = generateGraph(vertices, degree, i)
         if check2(g) == true
             fName = "Winner! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
@@ -113,21 +107,20 @@ function main()
     D = 4
     start  = 0
     finish = 1000
-    
+    seed = rand()
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
-    #@time bruteForce(V, D, start, finish)
-    #@time bruteForce2(V, D, start, finish)
+    ##@btime bruteForce2($V, $D, $start, $finish)
 
     #Compare graph generation 
-    generateGraph(V, D)
-    #@btime generateGraph($V, $D)
-    #@time check2(g2)
-    #@btime random_regular_graph($V, $D)
+    g = random_regular_graph(V, D)
+    g2 = generateGraph(V, D, seed)
 
-
+    @btime check($g, $V)
+    @btime check2($g2)
+    
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

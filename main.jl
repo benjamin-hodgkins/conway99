@@ -1,3 +1,4 @@
+using Random
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using CUDA
@@ -57,6 +58,7 @@ end
 
 #Makes random bitstring of length vertices based on seed
 function makeRow(vertices, seed)
+    Random.seed!(seed) #TODO Make this work with floats
     return [last(digits(base=2, rand(1:2^vertices), pad = vertices), vertices)] #TODO Have only degree ones, no loops
 end
 #Generates a (99, 14) graph 
@@ -65,7 +67,7 @@ function generateGraph(vertices, degree, seed)
     adj_mat = [makeRow(vertices, seed) for i in 1:vertices]
     # https://stackoverflow.com/questions/1851134/generate-all-binary-strings-of-length-n-with-k-bits-set/2075867#2075867
     # https://discourse.julialang.org/t/ann-bitpermutations-jl-efficient-routines-for-repeated-bit-permutations/93312
-
+    
     return adj_mat
 
 end
@@ -112,7 +114,8 @@ function main()
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
-    ##@btime bruteForce2($V, $D, $start, $finish)
+    #@btime bruteForce($V, $D, $start, $finish)
+    #@btime bruteForce2($V, $D, $start, $finish)
 
     #Compare graph generation 
     g = random_regular_graph(V, D)

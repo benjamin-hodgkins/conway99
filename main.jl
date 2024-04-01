@@ -56,12 +56,26 @@ function check2(adj_mat)
     return true   
 end
 
+
+function kbits(n, k)
+    result = []
+    for bits in permute!(n, k)
+        s = ['0'] * n
+        for bit in bits:
+            s[bit] = '1'
+        result.append(''.join(s))
+        end
+    end
+    return result
+end
 #Makes random bitstring of length vertices based on seed
 function makeRow(vertices, seed)
     Random.seed!(seed)
     min_val = BigInt(1)
     max_val = BigInt(2)^vertices
     #TODO Have only degree ones, no loops https://stackoverflow.com/questions/1851134/generate-all-binary-strings-of-length-n-with-k-bits-set/2075867#2075867
+    #https://stackoverflow.com/questions/506807/creating-multiple-numbers-with-certain-number-of-bits-set
+    #https://en.wikipedia.org/wiki/Combinatorial_number_system
     return [last(digits(base=2, rand(min_val:max_val), pad = vertices), vertices)] 
 end
 #Generates a (99, 14) graph 

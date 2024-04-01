@@ -58,15 +58,17 @@ end
 
 #Makes random bitstring of length vertices based on seed
 function makeRow(vertices, seed)
-    Random.seed!(seed) #TODO Make this work with floats
-    return [last(digits(base=2, rand(1:2^vertices), pad = vertices), vertices)] #TODO Have only degree ones, no loops
+    Random.seed!(seed)
+    min_val = BigInt(1)
+    max_val = BigInt(2)^vertices
+    #TODO Have only degree ones, no loops https://stackoverflow.com/questions/1851134/generate-all-binary-strings-of-length-n-with-k-bits-set/2075867#2075867
+    return [last(digits(base=2, rand(min_val:max_val), pad = vertices), vertices)] 
 end
 #Generates a (99, 14) graph 
 function generateGraph(vertices, degree, seed)
 
     adj_mat = [makeRow(vertices, seed) for i in 1:vertices]
-    # https://stackoverflow.com/questions/1851134/generate-all-binary-strings-of-length-n-with-k-bits-set/2075867#2075867
-    # https://discourse.julialang.org/t/ann-bitpermutations-jl-efficient-routines-for-repeated-bit-permutations/93312
+    # TODO optimize https://discourse.julialang.org/t/ann-bitpermutations-jl-efficient-routines-for-repeated-bit-permutations/93312
     
     return adj_mat
 
@@ -105,17 +107,17 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 9
-    D = 4
+    V = 40
+    D = 14
     start  = 0
     finish = 1000
-    seed = rand()
+    seed = 10
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
-    #@btime bruteForce($V, $D, $start, $finish)
-    #@btime bruteForce2($V, $D, $start, $finish)
+    @btime bruteForce($V, $D, $start, $finish)
+    @btime bruteForce2($V, $D, $start, $finish)
 
     #Compare graph generation 
     g = random_regular_graph(V, D)
@@ -123,7 +125,6 @@ function main()
 
     @btime check($g, $V)
     @btime check2($g2)
-    
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

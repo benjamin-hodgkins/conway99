@@ -56,17 +56,20 @@ function check2(adj_mat)
     return true   
 end
 
-function gospersHack(k::Int, n::Int)
+function gospersHack(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
-    set::Int = (1 << k) - 1
-    limit::Int = (1 << n)
+    set = (1 << k) - 1
+    limit = (1 << n)
     while (set < limit)
         #TODO Work with the existing set.
-        println(set)
+        println(digits(set, base=2, pad=3))
         #Gosper's hack:
-        c::Int = set & - set
-        r::Int = set + c
-        set = (((r ⊻ set) >> 2) / c) | r
+        c = set & - set
+        r = set + c
+        temp = (r ⊻ set)
+        temp1 = temp >> 2
+        temp2 = temp1  ÷ c
+        set = temp2 | r
     end
 end
 #Makes random bitstring of length vertices based on seed

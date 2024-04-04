@@ -56,26 +56,25 @@ function check2(adj_mat)
     return true   
 end
 
-
-function kbits(n, k)
-    result = []
-    for bits in permute!(n, k)
-        s = ['0'] * n
-        for bit in bits:
-            s[bit] = '1'
-        result.append(''.join(s))
-        end
+function gospersHack(k::Int, n::Int)
+    # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
+    set::Int = (1 << k) - 1
+    limit::Int = (1 << n)
+    while (set < limit)
+        #TODO Work with the existing set.
+        println(set)
+        #Gosper's hack:
+        c::Int = set & - set
+        r::Int = set + c
+        set = (((r ⊻ set) >> 2) / c) | r
     end
-    return result
 end
 #Makes random bitstring of length vertices based on seed
 function makeRow(vertices, seed)
     Random.seed!(seed)
     min_val = BigInt(1)
     max_val = BigInt(2)^vertices
-    #TODO Have only degree ones, no loops https://stackoverflow.com/questions/1851134/generate-all-binary-strings-of-length-n-with-k-bits-set/2075867#2075867
-    #https://stackoverflow.com/questions/506807/creating-multiple-numbers-with-certain-number-of-bits-set
-    #https://en.wikipedia.org/wiki/Combinatorial_number_system
+    #TODO Have only degree ones, no loops 
     return [last(digits(base=2, rand(min_val:max_val), pad = vertices), vertices)] 
 end
 #Generates a (99, 14) graph 
@@ -121,8 +120,8 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 40
-    D = 14
+    V = 9
+    D = 4
     start  = 0
     finish = 1000
     seed = 10
@@ -130,15 +129,17 @@ function main()
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
-    @btime bruteForce($V, $D, $start, $finish)
-    @btime bruteForce2($V, $D, $start, $finish)
+    #@btime bruteForce($V, $D, $start, $finish)
+    #@btime bruteForce2($V, $D, $start, $finish)
 
     #Compare graph generation 
     g = random_regular_graph(V, D)
     g2 = generateGraph(V, D, seed)
 
-    @btime check($g, $V)
-    @btime check2($g2)
+    #@btime check($g, $V)
+    #@btime check2($g2)
+
+    gospersHack(V, D)
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

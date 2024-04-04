@@ -56,20 +56,18 @@ function check2(adj_mat)
     return true   
 end
 
+#Generates all combinations of bitstrings of length n with k bits flipped in order
 function gospersHack(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     set = (1 << k) - 1
     limit = (1 << n)
     while (set < limit)
         #TODO Work with the existing set.
-        println(digits(set, base=2, pad=3))
+        #println(digits(set, base=2))
         #Gosper's hack:
         c = set & - set
         r = set + c
-        temp = (r ⊻ set)
-        temp1 = temp >> 2
-        temp2 = temp1  ÷ c
-        set = temp2 | r
+        set = (((r ⊻ set) >> 2) ÷ c) | r #wat
     end
 end
 #Makes random bitstring of length vertices based on seed
@@ -82,10 +80,7 @@ function makeRow(vertices, seed)
 end
 #Generates a (99, 14) graph 
 function generateGraph(vertices, degree, seed)
-
     adj_mat = [makeRow(vertices, seed) for i in 1:vertices]
-    # TODO optimize https://discourse.julialang.org/t/ann-bitpermutations-jl-efficient-routines-for-repeated-bit-permutations/93312
-    
     return adj_mat
 
 end
@@ -123,8 +118,8 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 9
-    D = 4
+    V = 99
+    D = 14
     start  = 0
     finish = 1000
     seed = 10
@@ -136,13 +131,11 @@ function main()
     #@btime bruteForce2($V, $D, $start, $finish)
 
     #Compare graph generation 
-    g = random_regular_graph(V, D)
-    g2 = generateGraph(V, D, seed)
+    @btime random_regular_graph($V, $D)
+    @btime generateGraph($V, $D, $seed)
+    @btime gospersHack($V, $D) #TODO Turn into graph generator, simply generates all possiblities right now
 
-    #@btime check($g, $V)
-    #@btime check2($g2)
-
-    gospersHack(V, D)
+    
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

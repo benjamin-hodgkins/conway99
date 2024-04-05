@@ -59,23 +59,27 @@ end
 #Generates all combinations of bitstrings of length n with k bits flipped in order
 function gospersHack(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
+    adj_mat = zeros(Int, n, n)
     set = (1 << k) - 1
-    limit = (1 << n)
+    limit = (1 << n) #TODO Overflowing 
     while (set < limit)
-        #TODO Work with the existing set.
+        #TODO Have only degree ones, no loops 
+        append!(adj_mat, digits(set, base=2, pad = vertices))
+        #show(adj_mat)
         #println(digits(set, base=2))
         #Gosper's hack:
         c = set & - set
         r = set + c
         set = (((r ⊻ set) >> 2) ÷ c) | r #wat
     end
+    return adj_mat
 end
 #Makes random bitstring of length vertices based on seed
 function makeRow(vertices, seed)
     Random.seed!(seed)
     min_val = BigInt(1)
     max_val = BigInt(2)^vertices
-    #TODO Have only degree ones, no loops 
+    
     return [last(digits(base=2, rand(min_val:max_val), pad = vertices), vertices)] 
 end
 #Generates a (99, 14) graph 
@@ -131,10 +135,12 @@ function main()
     #@btime bruteForce2($V, $D, $start, $finish)
 
     #Compare graph generation 
-    @btime random_regular_graph($V, $D)
-    @btime generateGraph($V, $D, $seed)
-    @btime gospersHack($V, $D) #TODO Turn into graph generator, simply generates all possiblities right now
+    #@btime random_regular_graph($V, $D)
+    #generateGraph($V, $D, $seed)
+    #@btime makeRow($V, $seed)
+    #gospersHack($V, $D) #TODO Turn into graph generator, simply generates all possiblities right now
 
+    gospersHack(V,D)
     
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")

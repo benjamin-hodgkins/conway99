@@ -59,12 +59,12 @@ end
 #Generates all combinations of bitstrings of length n with k bits flipped in order
 function gospersHack(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
-    adj_mat = zeros(Int, n, n)
+    adj_mat = Array{Int64}(undef, n, n) #TODO adding 0/1s for some reason
     set = (1 << k) - 1
     limit = (1 << n) #TODO Overflowing 
     while (set < limit)
         #TODO Have only degree ones, no loops 
-        append!(adj_mat, digits(set, base=2, pad = vertices))
+        append!(adj_mat, digits(set, base=2, pad = n)) 
         #show(adj_mat)
         #println(digits(set, base=2))
         #Gosper's hack:
@@ -122,8 +122,8 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 99
-    D = 14
+    V = 9
+    D = 4
     start  = 0
     finish = 1000
     seed = 10
@@ -136,12 +136,11 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    #generateGraph($V, $D, $seed)
+    #@btime generateGraph($V, $D, $seed)
     #@btime makeRow($V, $seed)
-    #gospersHack($V, $D) #TODO Turn into graph generator, simply generates all possiblities right now
 
-    gospersHack(V,D)
-    
+    gospersHack(V,D) #TODO Turn into graph generator, simply generates all possiblities right now
+    #@btime gospersHack($V, $D)
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

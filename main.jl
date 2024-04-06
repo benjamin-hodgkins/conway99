@@ -138,8 +138,7 @@ function main()
     #@btime random_regular_graph($V, $D)
     #@btime generateGraph($V, $D, $seed)
     #@btime makeRow($V, $seed)
-
-    @time gospersHack(V,D) #TODO Turn into graph generator, simply generates all possiblities right now
+    gospersHack(V,D) #TODO Turn into graph generator, simply generates all possiblities right now
     #@btime gospersHack($V, $D)
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")

@@ -1,3 +1,6 @@
+#Current intent - make method that directly generates (generateGraph() calls makeRow()) Adjacency Matrix to manipulate more efficiently in check2()
+#Eventually this is too brute force search graphs of 99,14,1,2
+
 using Random
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
@@ -6,7 +9,7 @@ using CUDA
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
 function paley9()
     
-    adj_mat = BitArray([
+    adj_mat = Array([
     0 1 1 1 0 0 1 0 0;
     1 0 0 0 1 0 1 1 0;
     1 0 0 1 0 0 0 1 1;
@@ -59,13 +62,14 @@ end
 #Generates all combinations of bitstrings of length n with k bits flipped in order
 function gospersHack(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
-    adj_mat = Array{Int128}(undef, binomial(n, k)) #TODO taking a lot of memory
+    adj_mat = Array{Int128}(undef, binomial(n, k))
+    println(sizeof(adj_mat))
     set::Int128 = 2^k - 1
     limit::Int128 = 2^n
     i::Int128 = 1
     while (set < limit)
         #TODO Have only degree ones, no loops 
-        adj_mat[i] = set #digits(set, base=2, pad = n)
+        adj_mat[i] = set #digits(set, base=2, pad = n) #TODO rand(1:2^16), get bitstring of that number, repeat n times
         #Gosper's hack:
         c = set & - set
         r = set + c
@@ -73,20 +77,6 @@ function gospersHack(n, k)
         i+=1
     end
     return adj_mat
-end
-#Makes random bitstring of length vertices based on seed
-function makeRow(vertices, seed)
-    Random.seed!(seed)
-    min_val = BigInt(1)
-    max_val = BigInt(2)^vertices
-    
-    return [last(digits(base=2, rand(min_val:max_val), pad = vertices), vertices)] 
-end
-#Generates a (99, 14) graph 
-function generateGraph(vertices, degree, seed)
-    adj_mat = [makeRow(vertices, seed) for i in 1:vertices]
-    return adj_mat
-
 end
 function bruteForce(vertices, degree, start, finish)
     #Multithreading
@@ -122,24 +112,22 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 25
-    D = 14
+    V = 20
+    D = 4
     start  = 0
-    finish = 1000
+    finish = 100
     seed = 10
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
-    #@btime bruteForce($V, $D, $start, $finish)
-    #@btime bruteForce2($V, $D, $start, $finish)
+    @btime bruteForce($V, $D, $start, $finish)
+    @btime bruteForce2($V, $D, $start, $finish)
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
     #@btime generateGraph($V, $D, $seed)
-    #@btime makeRow($V, $seed)
-    gospersHack(V,D) #TODO Turn into graph generator, simply generates all possiblities right now
-    #@btime gospersHack($V, $D)
+    
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

@@ -71,9 +71,9 @@ function gospersHack(n, k)
         #TODO Have only degree ones, no loops 
         adj_mat[i] = set #digits(set, base=2, pad = n) #TODO rand(1:2^16), get bitstring of that number, repeat n times
         #Gosper's hack:
-        c = set & - set
-        r = set + c
-        set = (((r ⊻ set) >> 2) ÷ c) | r #wat
+        c = set & - set # c is equal to the rightmost 1-bit in set.
+        r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
+        set = (((r ⊻ set) >> 2) ÷ c) | r # take the other bits of the rightmost cluster of 1 bits and place them as far to the right as possible 
         i+=1
     end
     return adj_mat

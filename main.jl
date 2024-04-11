@@ -60,16 +60,17 @@ function check2(adj_mat)
 end
 
 #Generates all combinations of bitstrings of length n with k bits flipped in order
-function gospersHack(n, k)
+function gospersHack(n, k, seed)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     adj_mat = Array{Int128}(undef, binomial(n, k))
     println(sizeof(adj_mat))
-    set::Int128 = 2^k - 1
-    limit::Int128 = 2^n
+    set::Int128 = 2^k - 1 #(1 << k) - 1
+    limit::Int128 = 2^n #(1 << n)
     i::Int128 = 1
     while (set < limit)
         #TODO Have only degree ones, no loops 
         adj_mat[i] = set #digits(set, base=2, pad = n) #TODO rand(1:2^16), get bitstring of that number, repeat n times
+        #TODO https://math.stackexchange.com/questions/2847310/equation-for-generating-integers-for-n-bit-binary-strings-with-k-bits-set-to-1
         #Gosper's hack:
         c = set & - set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -112,7 +113,7 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 20
+    V = 9
     D = 4
     start  = 0
     finish = 100
@@ -121,13 +122,16 @@ function main()
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
-    @btime bruteForce($V, $D, $start, $finish)
-    @btime bruteForce2($V, $D, $start, $finish)
+    #@btime bruteForce($V, $D, $start, $finish)
+    #@btime bruteForce2($V, $D, $start, $finish)
+    #@time bruteForce(99, 14, 4000000, 7000000)
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    #@btime generateGraph($V, $D, $seed)
-    
+    #@btime gospersHack($V, $D, $seed)
+
+    gospersHack(V, D, seed)
+
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

@@ -1,5 +1,5 @@
 #Current intent - make method that directly generates (generateGraph() calls makeRow()) Adjacency Matrix to manipulate more efficiently in check2()
-#Eventually this is too brute force search graphs of 99,14,1,2
+#Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
 using Random
 using Graphs, GraphRecipes, Plots
@@ -60,17 +60,16 @@ function check2(adj_mat)
 end
 
 #Generates all combinations of bitstrings of length n with k bits flipped in order
-function gospersHack(n, k, seed)
+#You are not expected to understand this
+function allPermutations(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
+    # https://iamkate.com/code/hakmem-item-175/
     adj_mat = Array{Int128}(undef, binomial(n, k))
-    println(sizeof(adj_mat))
     set::Int128 = 2^k - 1 #(1 << k) - 1
     limit::Int128 = 2^n #(1 << n)
     i::Int128 = 1
     while (set < limit)
-        #TODO Have only degree ones, no loops 
-        adj_mat[i] = set #digits(set, base=2, pad = n) #TODO rand(1:2^16), get bitstring of that number, repeat n times
-        #TODO https://math.stackexchange.com/questions/2847310/equation-for-generating-integers-for-n-bit-binary-strings-with-k-bits-set-to-1
+        adj_mat[i] = set #digits(set, base=2, pad = n)
         #Gosper's hack:
         c = set & - set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -78,6 +77,41 @@ function gospersHack(n, k, seed)
         i+=1
     end
     return adj_mat
+end
+
+#TODO https://learn.microsoft.com/en-us/previous-versions/visualstudio/aa289166(v=vs.70)
+#TODO Have only degree ones, no loops 
+function makeRow(n, k, m)
+    ans = Array{Int}(undef, k)
+
+    a = n
+    b = k
+    x = (binomial(n, k) - 1) - m # x is the "dual" of m
+    
+    i = 1
+    while i < k + 1
+      ans[i] = largestV(a,b,x) # largest value v, where v < a and vCb < x    
+      
+      x = x - binomial(ans[i],b)
+      a = ans[i]
+      b = b-1
+      i += 1
+    end
+    i = 1
+    while i < k + 1
+      ans[i] = (n-1) - ans[i]
+      i += 1
+    end
+
+    return ans
+end
+
+function largestV(a, b, x)
+    v = a - 1   
+    while (binomial(v,b) > x)
+      v -= 1
+    end
+    return v
 end
 function bruteForce(vertices, degree, start, finish)
     #Multithreading
@@ -115,22 +149,21 @@ function main()
     paley = paley9()
     V = 9
     D = 4
-    start  = 0
-    finish = 100
-    seed = 10
+    start  = 1#14000000
+    finish = 1000#20000000
+    seed = 1
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
     #@btime bruteForce($V, $D, $start, $finish)
     #@btime bruteForce2($V, $D, $start, $finish)
-    #@time bruteForce(99, 14, 4000000, 7000000)
+    #@time bruteForce(99, 14, start, finish)
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    #@btime gospersHack($V, $D, $seed)
-
-    gospersHack(V, D, seed)
+    allPermutations(V, D)
+    makeRow(V, D, seed)
 
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")

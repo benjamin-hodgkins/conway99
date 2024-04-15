@@ -81,34 +81,39 @@ end
 
 #TODO https://learn.microsoft.com/en-us/previous-versions/visualstudio/aa289166(v=vs.70)
 #TODO Have only degree ones, no loops 
-function makeRow(n, k, m)
-    ans = Array{Int}(undef, k)
+function makeRow(vertices, degree, elementToFind)
+    #TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
+    result = Array{Int}(undef, degree)
 
-    a = n
-    b = k
-    x = (binomial(n, k) - 1) - m # x is the "dual" of m
+    a = vertices
+    b = degree
+    dualOfElement = (binomial(vertices, degree) - 1) - elementToFind # the "dual" of m
     
     i = 1
-    while i < k + 1
-      ans[i] = largestV(a,b,x) # largest value v, where v < a and vCb < x    
+    #Gets combinadic of dualOfElement
+    while i < degree + 1
+      result[i] = largestValue(a, b, dualOfElement) # largest value v, where v < a and vCb < x    
       
-      x = x - binomial(ans[i],b)
-      a = ans[i]
+      dualOfElement = dualOfElement - binomial(result[i],b)
+      a = result[i]
       b = b-1
       i += 1
     end
+
     i = 1
-    while i < k + 1
-      ans[i] = (n-1) - ans[i]
+
+    while i < degree + 1
+      result[i] = (vertices-1) - result[i]
       i += 1
     end
 
-    return ans
+    return result
 end
 
-function largestV(a, b, x)
+#Computes digits of combinadic
+function largestValue(a, b, dual)
     v = a - 1   
-    while (binomial(v,b) > x)
+    while (binomial(v,b) > dual)
       v -= 1
     end
     return v
@@ -147,11 +152,11 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 9
+    V = 7
     D = 4
     start  = 1#14000000
     finish = 1000#20000000
-    seed = 1
+    seed = 6
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
@@ -162,8 +167,9 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    allPermutations(V, D)
-    makeRow(V, D, seed)
+    println(allPermutations(V, D)[seed])
+
+    println(makeRow(V, D, seed))
 
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")

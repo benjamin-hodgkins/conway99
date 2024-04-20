@@ -79,41 +79,51 @@ function allPermutations(n, k)
     return adj_mat
 end
 
-#TODO https://learn.microsoft.com/en-us/previous-versions/visualstudio/aa289166(v=vs.70)
 #TODO Have only degree ones, no loops 
-function makeRow(vertices, degree, elementToFind)
-    #TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
-    result = Array{Int}(undef, degree)
-
-    a = vertices
-    b = degree
-    dualOfElement = (binomial(vertices, degree) - 1) - elementToFind # the "dual" of m
+#TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
+#TODO Get this to map to k-combination
+#Returns the k-combination of (n choose k) with the provided rank
+function makeRow(n, k, rank)
+    dualOfZero = n - 1
+    #Calculate the dual
+    dual = binomial(n, k) - rank
     
-    i = 1
-    #Gets combinadic of dualOfElement
-    while i < degree + 1
-      result[i] = largestValue(a, b, dualOfElement) # largest value v, where v < a and vCb < x    
-      
-      dualOfElement = dualOfElement - binomial(result[i],b)
-      a = result[i]
-      b = b-1
-      i += 1
-    end
+    #Gets combinadic of dual
+    combination = combinadic(n, k, dual)
 
     i = 1
+    while i < k + 1
+        #Map to zero-based combination
+        combination[i] = dualOfZero - combination[i]
 
-    while i < degree + 1
-      result[i] = (vertices-1) - result[i]
-      i += 1
+        #Add 2 (for base 2)
+        combination[i] += 2
+        i += 1
     end
 
+    return combination
+end
+
+#Calculates zero-based array of c such that maxRank = (c1 choose k-1) + (c2 choose k-2) + ... (c[of k-1] choose 1)
+function combinadic(n, k, maxRank)
+    result = Array{Int}(undef, k)
+    diminishingRank = maxRank
+    reducingK = k
+
+    i = 1
+    while i <= k
+        result[i] = largestValue(n, reducingK, diminishingRank) # largest value v, where v < a and vCb < x    
+        diminishingRank -= binomial(result[i], reducingK)
+        reducingK -= 1
+        i += 1
+    end
     return result
 end
 
-#Computes digits of combinadic
-function largestValue(a, b, dual)
-    v = a - 1   
-    while (binomial(v,b) > dual)
+#Returns the highest rank of n2 choose k2 that is less than the threshold
+function largestValue(n2, k2, threshold)
+    v = n2 - 1   
+    while binomial(v,k2) > threshold
       v -= 1
     end
     return v
@@ -152,11 +162,11 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    V = 7
-    D = 4
+    n = 9
+    k = 4
     start  = 1#14000000
     finish = 1000#20000000
-    seed = 6
+    seed = 1
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
@@ -167,9 +177,9 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    println(allPermutations(V, D)[seed])
+    println(allPermutations(n, k)[seed])
 
-    println(makeRow(V, D, seed))
+    println(makeRow(n, k, seed))
 
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")

@@ -123,23 +123,12 @@ function combinadic(n, k, maxRank)
     return result
 end
 
-#Returns the highest rank of n2 choose k2 that is less than the threshold
-function largestValue(n2, k2, threshold)
-    v = n2 - 1   
-    while binomial(v,k2) > threshold
-      v -= 1
-    end
-    return v
-end
-
 function binomialCheck(row)
-
     result = 0
     counter = 0
     len = length(row)
     for i in range(1, len)
-        temp = row[i]
-        result += binomial(temp, len - counter)
+        result += binomial(row[i], len - counter)
         counter += 1
     end
     return result
@@ -178,8 +167,8 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    n = 9
-    k = 4
+    n = 5
+    k = 3
     start  = 1#14000000
     finish = 1000#20000000
     rank = 1
@@ -195,10 +184,11 @@ function main()
     #@btime random_regular_graph($V, $D)
     
     row = makeRow(n, k, rank)
-    target = allPermutations(n, k)[rank]
+    target = allPermutations(n, k)
     actual = binomialCheck(row)
-    println(row)
-    @test target == actual
+    println("Row: " * string(row))
+    println("Target: " * string(target))
+    @test target[rank] == actual
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

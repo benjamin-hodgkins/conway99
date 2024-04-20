@@ -80,9 +80,9 @@ function allPermutations(n, k)
     return adj_mat
 end
 
-#TODO Have only degree ones, no loops 
 #TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
-#TODO Get this to map to k-combination (will this work?????)
+#TODO Get this to map to k-combination
+#TODO Divide desired rank by 2^rank to determine if it will have a 1 in (n,n) (loop)?
 #Returns the k-combination of (n choose k) with the provided rank
 function makeRow(n, k, rank)
     

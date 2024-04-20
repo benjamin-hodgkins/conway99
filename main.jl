@@ -5,6 +5,7 @@ using Random
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using CUDA
+using Test
 
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
 function paley9()
@@ -65,11 +66,11 @@ function allPermutations(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     # https://iamkate.com/code/hakmem-item-175/
     adj_mat = Array{Int128}(undef, binomial(n, k))
-    set::Int128 = 2^k - 1 #(1 << k) - 1
-    limit::Int128 = 2^n #(1 << n)
+    set::Int128 = 2^k - 1 
+    limit::Int128 = 2^n 
     i::Int128 = 1
     while (set < limit)
-        adj_mat[i] = set #digits(set, base=2, pad = n)
+        adj_mat[i] = set
         #Gosper's hack:
         c = set & - set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -99,7 +100,7 @@ function makeRow(n, k, rank)
         combination[i] = dualOfZero - combination[i]
 
         #Add 2 (for base 2)
-        combination[i] += 2
+        combination[i] += 1
         i += 1
     end
 
@@ -114,7 +115,7 @@ function combinadic(n, k, maxRank)
 
     i = 1
     while i <= k
-        result[i] = largestValue(n, reducingK, diminishingRank) # largest value v, where v < a and vCb < x    
+        result[i] = largestValue(n, reducingK, diminishingRank)   
         diminishingRank -= binomial(result[i], reducingK)
         reducingK -= 1
         i += 1
@@ -129,6 +130,19 @@ function largestValue(n2, k2, threshold)
       v -= 1
     end
     return v
+end
+
+function binomialCheck(row)
+
+    result = 0
+    counter = 0
+    len = length(row)
+    for i in range(1, len)
+        temp = row[i]
+        result += binomial(temp, len - counter)
+        counter += 1
+    end
+    return result
 end
 function bruteForce(vertices, degree, start, finish)
     #Multithreading
@@ -164,8 +178,8 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    n = 5
-    k = 3
+    n = 9
+    k = 4
     start  = 1#14000000
     finish = 1000#20000000
     rank = 1
@@ -179,9 +193,12 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    println(allPermutations(n, k)[rank])
-
-    println(makeRow(n, k, rank))
+    
+    row = makeRow(n, k, rank)
+    target = allPermutations(n, k)[rank]
+    actual = binomialCheck(row)
+    println(row)
+    @test target == actual
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

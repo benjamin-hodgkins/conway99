@@ -81,18 +81,20 @@ end
 
 #TODO Have only degree ones, no loops 
 #TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
-#TODO Get this to map to k-combination
+#TODO Get this to map to k-combination (will this work?????)
 #Returns the k-combination of (n choose k) with the provided rank
 function makeRow(n, k, rank)
+    
     dualOfZero = n - 1
-    #Calculate the dual
+    #Calculate the dual (base zero)
+    
     dual = binomial(n, k) - rank
     
     #Gets combinadic of dual
     combination = combinadic(n, k, dual)
 
     i = 1
-    while i < k + 1
+    while i <= k
         #Map to zero-based combination
         combination[i] = dualOfZero - combination[i]
 
@@ -162,11 +164,11 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    n = 9
-    k = 4
+    n = 5
+    k = 3
     start  = 1#14000000
     finish = 1000#20000000
-    seed = 1
+    rank = 1
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
@@ -177,10 +179,9 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    println(allPermutations(n, k)[seed])
+    println(allPermutations(n, k)[rank])
 
-    println(makeRow(n, k, seed))
-
+    println(makeRow(n, k, rank))
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

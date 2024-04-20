@@ -123,6 +123,15 @@ function combinadic(n, k, maxRank)
     return result
 end
 
+#Returns the highest rank of n2 choose k2 that is less than the threshold
+function largestValue(n2, k2, threshold)
+    v = n2 - 1   
+    while binomial(v,k2) > threshold
+      v -= 1
+    end
+    return v
+end
+
 function binomialCheck(row)
     result = 0
     counter = 0
@@ -184,11 +193,13 @@ function main()
     #@btime random_regular_graph($V, $D)
     
     row = makeRow(n, k, rank)
-    target = allPermutations(n, k)
+    combinations = allPermutations(n, k)
     actual = binomialCheck(row)
+    target = combinations[rank]
     println("Row: " * string(row))
+    println("Combinations: " * string(combinations))
     println("Target: " * string(target))
-    @test target[rank] == actual
+    @test target == actual
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

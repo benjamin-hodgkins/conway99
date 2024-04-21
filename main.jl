@@ -88,7 +88,6 @@ function makeRow(n, k, rank)
     
     dualOfZero = n - 1
     #Calculate the dual (base zero)
-    
     dual = binomial(n, k) - rank
     
     #Gets combinadic of dual
@@ -100,7 +99,7 @@ function makeRow(n, k, rank)
         combination[i] = dualOfZero - combination[i]
 
         #Add 2 (for base 2)
-        combination[i] += 1
+        combination[i] += 2
         i += 1
     end
 
@@ -114,7 +113,7 @@ function combinadic(n, k, maxRank)
     reducingK = k
 
     i = 1
-    while i <= k
+    while i <= k #TODO Debug, returning wrong values for [9,4]
         result[i] = largestValue(n, reducingK, diminishingRank)   
         diminishingRank -= binomial(result[i], reducingK)
         reducingK -= 1
@@ -191,13 +190,12 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    
     row = makeRow(n, k, rank)
     combinations = allPermutations(n, k)
     actual = binomialCheck(row)
     target = combinations[rank]
     println("Row: " * string(row))
-    println("Combinations: " * string(combinations))
+    #println("Combinations: " * string(combinations))
     println("Target: " * string(target))
     @test target == actual
     #if isfile("Winner! Seed - 19.lgz")

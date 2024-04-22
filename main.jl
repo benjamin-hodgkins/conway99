@@ -81,14 +81,19 @@ function allPermutations(n, k)
 end
 
 #TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
+#TODO https://math.stackexchange.com/questions/1227409/indexing-all-combinations-without-making-list
 #TODO Get this to map to k-combination
 #TODO Divide desired rank by 2^rank to determine if it will have a 1 in (n,n) (loop)?
 #Returns the k-combination of (n choose k) with the provided rank
 function makeRow(n, k, rank)
-    
+
     dualOfZero = n - 1
+
+    # Move to base 0
+    rank -= 1
+    
     #Calculate the dual (base zero)
-    dual = binomial(n, k) - rank
+    dual = binomial(n, k) - 1 - rank
     
     #Gets combinadic of dual
     combination = combinadic(n, k, dual)
@@ -99,7 +104,7 @@ function makeRow(n, k, rank)
         combination[i] = dualOfZero - combination[i]
 
         #Add 2 (for base 2)
-        combination[i] += 2
+        combination[i] += 1
         i += 1
     end
 
@@ -175,11 +180,11 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    n = 5
-    k = 3
+    n = 7
+    k = 4
     start  = 1#14000000
     finish = 1000#20000000
-    rank = 1
+    rank = 6
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
@@ -193,6 +198,7 @@ function main()
     row = makeRow(n, k, rank)
     combinations = allPermutations(n, k)
     actual = binomialCheck(row)
+
     target = combinations[rank]
     println("Row: " * string(row))
     #println("Combinations: " * string(combinations))

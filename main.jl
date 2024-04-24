@@ -6,6 +6,7 @@ using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using CUDA
 using Test
+using Printf
 
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
 function paley9()
@@ -180,11 +181,11 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    n = 7
-    k = 4
-    start  = 1#14000000
-    finish = 1000#20000000
-    rank = 6
+    n = 99
+    k = 14
+    start  = 1#50000000
+    finish = 200
+    rank = 1
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
@@ -192,18 +193,20 @@ function main()
     #@btime bruteForce($V, $D, $start, $finish)
     #@btime bruteForce2($V, $D, $start, $finish)
     #@time bruteForce(99, 14, start, finish)
+    #@printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start)
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
     row = makeRow(n, k, rank)
-    combinations = allPermutations(n, k)
+    #combinations = allPermutations(n, k)
     actual = binomialCheck(row)
 
-    target = combinations[rank]
+    #target = combinations[rank]
     println("Row: " * string(row))
+    println(actual)
     #println("Combinations: " * string(combinations))
-    println("Target: " * string(target))
-    @test target == actual
+    #println("Target: " * string(target))
+    #@test target == actual
     #if isfile("Winner! Seed - 19.lgz")
         #g = loadgraph("Winner! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

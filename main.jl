@@ -1,7 +1,7 @@
 #Current intent - make method that directly generates (generateGraph() calls makeRow()) Adjacency Matrix to manipulate more efficiently in check2()
 #Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
-using Random
+using Random, Combinatorics
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using CUDA
@@ -81,72 +81,14 @@ function allPermutations(n, k)
     return adj_mat
 end
 
-#TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
-#TODO https://math.stackexchange.com/questions/1227409/indexing-all-combinations-without-making-list
-#TODO Get this to map to k-combination
-#TODO Divide desired rank by 2^rank to determine if it will have a 1 in (n,n) (loop)?
 #Returns the k-combination of (n choose k) with the provided rank
 function makeRow(n, k, rank)
 
-    dualOfZero = n - 1
+    CoolLexCombinations(n, k )
 
-    # Move to base 0
-    rank -= 1
-    
-    #Calculate the dual (base zero)
-    dual = binomial(n, k) - 1 - rank
-    
-    #Gets combinadic of dual
-    combination = combinadic(n, k, dual)
-
-    i = 1
-    while i <= k
-        #Map to zero-based combination
-        combination[i] = dualOfZero - combination[i]
-
-        #Add 2 (for base 2)
-        combination[i] += 1
-        i += 1
-    end
-
-    return combination
+    return row
 end
 
-#Calculates zero-based array of c such that maxRank = (c1 choose k-1) + (c2 choose k-2) + ... (c[of k-1] choose 1)
-function combinadic(n, k, maxRank)
-    result = Array{Int}(undef, k)
-    diminishingRank = maxRank
-    reducingK = k
-
-    i = 1
-    while i <= k #TODO Debug, returning wrong values for [9,4]
-        result[i] = largestValue(n, reducingK, diminishingRank)   
-        diminishingRank -= binomial(result[i], reducingK)
-        reducingK -= 1
-        i += 1
-    end
-    return result
-end
-
-#Returns the highest rank of n2 choose k2 that is less than the threshold
-function largestValue(n2, k2, threshold)
-    v = n2 - 1   
-    while binomial(v,k2) > threshold
-      v -= 1
-    end
-    return v
-end
-
-function binomialCheck(row)
-    result = 0
-    counter = 0
-    len = length(row)
-    for i in range(1, len)
-        result += binomial(row[i], len - counter)
-        counter += 1
-    end
-    return result
-end
 function bruteForce(vertices, degree, start, finish)
     #Multithreading
     Threads.@threads for i in range(start, finish)
@@ -181,8 +123,8 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-    n = 99
-    k = 14
+    n = 9
+    k = 4
     start  = 1#50000000
     finish = 200
     rank = 1
@@ -212,4 +154,4 @@ function main()
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
     #end
 end
-main()
+#main()

@@ -83,10 +83,7 @@ end
 
 #Returns the k-combination of (n choose k) with the provided rank
 function makeRow(n, k, rank)
-
-    CoolLexCombinations(n, k )
-
-    return row
+    return CoolLexCombinations(n, k)
 end
 
 function bruteForce(vertices, degree, start, finish)
@@ -139,19 +136,9 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-    row = makeRow(n, k, rank)
-    #combinations = allPermutations(n, k)
-    actual = binomialCheck(row)
-
-    #target = combinations[rank]
-    println("Row: " * string(row))
-    println(actual)
-    #println("Combinations: " * string(combinations))
-    #println("Target: " * string(target))
-    #@test target == actual
-    #if isfile("Winner! Seed - 19.lgz")
-        #g = loadgraph("Winner! Seed - 19.lgz")
-        #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
-    #end
+    x = [0,0,0,0,0,1,1,1,1]
+    @time nthperm(x, 1)
+    #@time allPermutations(n, k)
+    #makeRow(n, k , rank)
 end
-#main()
+main()

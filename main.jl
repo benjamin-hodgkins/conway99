@@ -5,8 +5,6 @@ using Random, Combinatorics
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using CUDA
-using Test
-using Printf
 
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
 function paley9()
@@ -25,7 +23,7 @@ function paley9()
     return adj_mat
 end
 
-#Checks properties of graph v1
+#Checks properties of graph v1 (work with Julia graph type)
 function check(graph, vertices)
     for i in range(1,vertices)
         for j in range(i+1,vertices)
@@ -36,7 +34,7 @@ function check(graph, vertices)
             edge = has_edge(graph, i, j)
             numNeighbors = length(neighbors)
 
-            if numNeighbors == 1 && edge || numNeighbors == 2 && !edge   
+            if numNeighbors == 1 && edge || numNeighbors == 2 && !edge  #If adjacent, check for 1 common neighbor, if not, check for 2
                 continue
             else
                 return false
@@ -46,48 +44,19 @@ function check(graph, vertices)
     return true
 end
 
-#Checks properties of graph v2
+#Checks properties of graph v2 (works with adjacency matrix)
 function check2(adj_mat)
     num_neigh_mat = transpose(adj_mat) * adj_mat
     for i in range(1, length(adj_mat))
         if num_neigh_mat[i] == 4
             continue
-        elseif adj_mat[i] == 1 && num_neigh_mat[i] == 1 || adj_mat[i] == 0 && num_neigh_mat[i] == 2
+        elseif adj_mat[i] == 1 && num_neigh_mat[i] == 1 || adj_mat[i] == 0 && num_neigh_mat[i] == 2 #If adjacent, check for 1 common neighbor, if not, check for 2
             continue
         else
             return false
         end
     end
     return true   
-end
-
-#Generates all combinations of bitstrings of length n with k bits flipped in order
-#You are not expected to understand this
-function allPermutations(n, k)
-    # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
-    # https://iamkate.com/code/hakmem-item-175/
-    adj_mat = Array{Int128}(undef, binomial(n, k))
-    set::Int128 = 2^k - 1 
-    limit::Int128 = 2^n 
-    i::Int128 = 1
-    while (set < limit)
-        adj_mat[i] = set
-        #Gosper's hack:
-        c = set & - set # c is equal to the rightmost 1-bit in set.
-        r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
-        set = (((r ⊻ set) >> 2) ÷ c) | r # take the other bits of the rightmost cluster of 1 bits and place them as far to the right as possible 
-        i+=1
-    end
-    return adj_mat
-end
-
-#Generates a random (n, k) regular graph
-#TODO Make graph regular
-#TODO Make graph pass check2
-function generateGraph(row, n, k, position::Int) 
-    #TODO copy n /2 rows and reverse for last n/2 rows?
-    graph = [nthperm!(row, rand(1:factorial(n))) for i in 1:n]
-    return graph
 end
 
 function bruteForce(vertices, degree, start, finish)
@@ -103,46 +72,36 @@ function bruteForce(vertices, degree, start, finish)
     return false 
 end
 
-function bruteForce2(row, n, k, start, finish)
-    #Multithreading Threads.@threads 
-    for i::Int in range(start, finish)
-        g = generateGraph(row, n, k, i)
-        if check2(g) == true
-            fName = "Winner (2)! Seed - " * string(i) * (".lgz")
-            savegraph(fName, g)
-            return true
-        end 
-    end
-    return false 
-end
-
 #The graph should have 99 vertices
 #the graph is a regular graph with 14 edges per vertex.
 #every pair of adjacent vertices should have 1 common neighbor, 
 #and every pair of non-adjacent vertices should have 2 common neighbors. 
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
-    #TODO Create custom graph generator
     paley = paley9()
     n = 9
     k = 4
-    start  = 1#50000000
-    finish = factorial(n) 
-    row = append!(zeros(n-k), ones(k))
+    start = 1
+    finish = factorial(n)
+    adj_mat = Array([
+        0 1 1 1 0 0 1 0 0;
+        1 0 0 0 1 0 1 1 0;
+        1 0 0 1 0 0 0 1 1;
+        1 0 1 0 1 1 0 0 0;
+        0 1 0 1 0 1 0 1 0;
+        0 0 0 1 1 0 1 0 1;
+        1 1 0 0 0 1 0 0 1;
+        0 1 1 0 1 0 0 0 1;
+        0 0 1 0 0 1 1 1 0
+        ])
     
-    #Graph to pass to GPU (use CuArray in main)
-    #graph = CuArray{Int}(undef, (degree + 2) * vertices)
-
     #Compare brute force methods
-    @btime bruteForce($n, $k, $start, $finish)
-    @btime bruteForce2($row, $n, $k, $start, $finish / $n)
+    @time bruteForce(n, k, start, finish)
 
-    #Compare graph generation methods
-    @time random_regular_graph(n, k)
-    @time generateGraph(row, n, k, 1)
+    println(check2(paley))
+    println(check2(adj_mat))
 
-
-    #@time bruteForce(99, 14, start, finish)
-    #@printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start)
+  #TODO Make first half of graph, make middle row 01 * 49 + 0, reverse first half for last half
+    
 end
 main()

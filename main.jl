@@ -81,12 +81,12 @@ function allPermutations(n, k)
     return adj_mat
 end
 
-#Generates a (n, k) regular graph
+#Generates a random (n, k) regular graph
 #TODO Make graph regular
 #TODO Make graph pass check2
-function generateGraph(n, k, position::Int) 
-    row = append!(zeros(n-k), ones(k))
-    graph = [nthperm!(row, i*position) for i in 1:n]
+function generateGraph(row, n, k, position::Int) 
+    #TODO copy n /2 rows and reverse for last n/2 rows?
+    graph = [nthperm!(row, rand(1:factorial(n))) for i in 1:n]
     return graph
 end
 
@@ -103,10 +103,10 @@ function bruteForce(vertices, degree, start, finish)
     return false 
 end
 
-function bruteForce2(n, k, start, finish)
+function bruteForce2(row, n, k, start, finish)
     #Multithreading Threads.@threads 
     for i::Int in range(start, finish)
-        g = generateGraph(n, k, i)
+        g = generateGraph(row, n, k, i)
         if check2(g) == true
             fName = "Winner (2)! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
@@ -124,18 +124,24 @@ function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     #TODO Create custom graph generator
     paley = paley9()
-
     n = 9
     k = 4
     start  = 1#50000000
     finish = factorial(n) 
+    row = append!(zeros(n-k), ones(k))
+    
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
-    
+
     #Compare brute force methods
-    #@btime bruteForce($n, $k, $start, $finish)
-    @btime bruteForce2($n, $k, $start, $finish / $n)
-    check2(paley)
+    @btime bruteForce($n, $k, $start, $finish)
+    @btime bruteForce2($row, $n, $k, $start, $finish / $n)
+
+    #Compare graph generation methods
+    @time random_regular_graph(n, k)
+    @time generateGraph(row, n, k, 1)
+
+
     #@time bruteForce(99, 14, start, finish)
     #@printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start)
 end

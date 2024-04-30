@@ -94,14 +94,18 @@ function main()
         0 1 1 0 1 0 0 0 1;
         0 0 1 0 0 1 1 1 0
         ])
-    
+
     #Compare brute force methods
     @time bruteForce(n, k, start, finish)
 
     println(check2(paley))
     println(check2(adj_mat))
 
-  #TODO Make first half of graph, make middle row 01 * 49 + 0, reverse first half for last half
+    middleRow = [0]
+    show(append!(middleRow, repeat([1,0], Int((n-1)/2))))
+
+    #TODO Make first half of graph, make middle row 01 * 49 + 0, reverse first half for last half
+    test = adjacency_matrix(random_regular_graph((n - 1) / 2, k)) #TODO generate only half of a graph 
     
 end
 main()

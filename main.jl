@@ -140,7 +140,7 @@ function main()
     #Compare graph generation methods
     @time random_regular_graph(n, k)
     @time generateGraph(row, n, k, 1)
-
+    #todo 
 
     #@time bruteForce(99, 14, start, finish)
     #@printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start)

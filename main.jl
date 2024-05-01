@@ -1,4 +1,4 @@
-#Current intent - correct generateGraph() to make regular graphs to feed into check2()
+#Current intent - make method that directly generates (generateGraph() calls makeRow()) Adjacency Matrix to manipulate more efficiently in check2()
 #Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
 using Random, Combinatorics
@@ -79,21 +79,17 @@ function allPermutations(n, k)
     return adj_mat
 end
 
-#Generates a (n, k) regular graph
-#TODO Make graph regular
-#TODO Make graph pass check2
-function generateGraph(n, k, position::Int) 
-    row = append!(zeros(n-k), ones(k))
-    graph = [nthperm!(row, i*position) for i in 1:n]
-    return graph
+#Returns the k-combination of (n choose k) with the provided rank
+function makeRow(n, k, rank)
+    return CoolLexCombinations(n, k)
 end
 
 function bruteForce(vertices, degree, start, finish)
     #Multithreading
     Threads.@threads for i in range(start, finish)
-        g = random_regular_graph(vertices, degree, seed=i)
+        g = random_regular_graph(vertices, degree, seed=i) #TODO Bottleneck
         if check(g, vertices) == true
-            fName = "Winner (1)! Seed - " * string(i) * (".lgz")
+            fName = "Winner! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
             return true
         end 
@@ -101,12 +97,12 @@ function bruteForce(vertices, degree, start, finish)
     return false 
 end
 
-function bruteForce2(n, k, start, finish)
-    #Multithreading Threads.@threads 
-    for i::Int in range(start, finish)
-        g = generateGraph(n, k, i)
+function bruteForce2(vertices, degree, start, finish)
+    #Multithreading
+    Threads.@threads for i in range(start, finish)
+        g = generateGraph(vertices, degree, i)
         if check2(g) == true
-            fName = "Winner (2)! Seed - " * string(i) * (".lgz")
+            fName = "Winner! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
             return true
         end 
@@ -121,19 +117,25 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-
     n = 9
     k = 4
     start  = 1#50000000
-    finish = factorial(n) 
+    finish = 200
+    rank = 1
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
     #Compare brute force methods
-    #@btime bruteForce($n, $k, $start, $finish)
-    @btime bruteForce2($n, $k, $start, $finish / $n)
-    check2(paley)
+    #@btime bruteForce($V, $D, $start, $finish)
+    #@btime bruteForce2($V, $D, $start, $finish)
     #@time bruteForce(99, 14, start, finish)
     #@printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start)
+
+    #Compare graph generation 
+    #@btime random_regular_graph($V, $D)
+    x = [0,0,0,0,0,1,1,1,1]
+    @time nthperm(x, 1)
+    #@time allPermutations(n, k)
+    #makeRow(n, k , rank)
 end
 main()

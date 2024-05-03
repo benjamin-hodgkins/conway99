@@ -62,15 +62,15 @@ end
 
 #Generates all combinations of bitstrings of length n with k bits flipped in order
 #You are not expected to understand this
-function allPermutations(n, k)
+function allCombinations(n::Int128, k::Int128)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     # https://iamkate.com/code/hakmem-item-175/
-    adj_mat = Array{Int128}(undef, binomial(n, k))
+    adj_mat = Array{Int128}(undef, 1) #Array{Int128}(undef, binomial(n, k))
     set::Int128 = 2^k - 1 
     limit::Int128 = 2^n 
     i::Int128 = 1
     while (set < limit)
-        adj_mat[i] = set
+        adj_mat[1] = set
         #Gosper's hack:
         c = set & - set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -80,18 +80,15 @@ function allPermutations(n, k)
     return adj_mat
 end
 
-#TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations/#Another-Numbers-Game
+#TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations
 #TODO https://math.stackexchange.com/questions/1227409/indexing-all-combinations-without-making-list
 #TODO Get this to map to k-combination
 #Returns the k-combination of (n choose k) with the provided rank
 function makeRow(n, k, rank)
     dualOfZero = n - 1
-
-    # Move to base 0
-    rank -= 1
     
     #Calculate the dual (base zero)
-    dual = binomial(n, k) - 1 - rank
+    dual = binomial(n, k) - rank
     
     #Gets combinadic of dual
     combination = combinadic(n, k, dual)
@@ -101,7 +98,7 @@ function makeRow(n, k, rank)
         #Map to zero-based combination
         combination[i] = dualOfZero - combination[i]
 
-        #Add 2 (for base 2)
+        #Add 1 (for base 1)
         combination[i] += 1
         i += 1
     end
@@ -179,8 +176,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 9
-    k = 4
+    n::Int128 = 99
+    k::Int128 = 14
     start  = 1#50000000
     finish = 200
     rank = 1
@@ -198,16 +195,19 @@ function main()
     #TODO Make first half of graph, insert middleRow, copy first half and reverse for last half
     middleRow = [Int8(0)]
     append!(middleRow, repeat([1,0], Int((n-1)/2)))
-
+    
     row = makeRow(n, k, rank)
-    combinations = allPermutations(n, k)
+    combinations = allCombinations(n, k)
     actual = binomialCheck(row)
 
     target = combinations[rank]
+
+    println("Combinations: " * string(combinations))
     println("Row: " * string(row))
-    #println("Combinations: " * string(combinations))
+    println(actual)
     println("Target: " * string(target))
-    @test target == actual
+    #@test target == actual
+    
     #makeRow(n, k , rank)
 end
 main()

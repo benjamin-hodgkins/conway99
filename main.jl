@@ -65,37 +65,24 @@ end
 function allPermutations(n::Int128, k::Int128)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     # https://iamkate.com/code/hakmem-item-175/
-    adj_mat = Array{Int128}(undef, binomial(n, k))
     set::Int128 = 2^k - 1 
     limit::Int128 = 2^n 
     i::Int128 = 1
     while (set < limit)
-        adj_mat[i] = set
+        checkPermutation(set, n)
         #Gosper's hack:
         c = set & - set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
         set = (((r ⊻ set) >> 2) ÷ c) | r # take the other bits of the rightmost cluster of 1 bits and place them as far to the right as possible 
         i+=1
     end 
-    return adj_mat
 end
 
-#TODO
-#Returns the k-combination of (n choose k) with the provided rank
-function makeRow(n, k, rank)
 
-    return permutation
-end
-
-function binomialCheck(row)
-    result = 0
-    counter = 0
-    len = length(row)
-    for i in range(1, len)
-        result += binomial(row[i], len - counter)
-        counter += 1
-    end
-    return result
+function checkPermutation(set, n)
+    #TODO Check each permutation of first row and following rows
+    firstRow = reverse(digits(set, base = 2, pad = n))
+    
 end
 
 function bruteForce(vertices, degree, start, finish)
@@ -132,11 +119,10 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n::Int128 = 9
-    k::Int128 = 4
+    n::Int128 = 20
+    k::Int128 = 6
     start  = 1#50000000
     finish = 200
-    rank = 10
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
@@ -148,22 +134,12 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
+
     #TODO Make first half of graph, insert middleRow, copy first half and reverse for last half
-    middleRow = [Int8(0)]
-    append!(middleRow, repeat([1,0], Int((n-1)/2)))
-    
-    row = makeRow(n, k, rank)
-    combinations = allPermutations(n, k)
-    actual = binomialCheck(row)
+    #middleRow = [Int8(0)]
+    #append!(middleRow, repeat([1,0], Int((n-1)/2)))
 
-    target = combinations[rank]
-
-    println("Combinations: " * string(combinations))
-    println("Row: " * string(row))
-    println(actual)
-    println("Target: " * string(target))
-    #@test target == actual
-    
-    #makeRow(n, k , rank)
+    #@btime allPermutations($n,$k)
+    @time allPermutations(n, k)
 end
 main()

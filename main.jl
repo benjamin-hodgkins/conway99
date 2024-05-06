@@ -60,17 +60,17 @@ function check2(adj_mat)
     return true   
 end
 
-#Generates all combinations of bitstrings of length n with k bits flipped in order
+#Generates all permutations of bitstrings of length n with k bits flipped in order
 #You are not expected to understand this
-function allCombinations(n::Int128, k::Int128)
+function allPermutations(n::Int128, k::Int128)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     # https://iamkate.com/code/hakmem-item-175/
-    adj_mat = Array{Int128}(undef, 1) #Array{Int128}(undef, binomial(n, k))
+    adj_mat = Array{Int128}(undef, binomial(n, k))
     set::Int128 = 2^k - 1 
     limit::Int128 = 2^n 
     i::Int128 = 1
     while (set < limit)
-        adj_mat[1] = set
+        adj_mat[i] = set
         #Gosper's hack:
         c = set & - set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -80,55 +80,11 @@ function allCombinations(n::Int128, k::Int128)
     return adj_mat
 end
 
-#TODO https://www.redperegrine.net/2021/04/10/software-algorithms-for-k-combinations
-#TODO https://math.stackexchange.com/questions/1227409/indexing-all-combinations-without-making-list
-#TODO Get this to map to k-combination
+#TODO
 #Returns the k-combination of (n choose k) with the provided rank
 function makeRow(n, k, rank)
-    dualOfZero = n - 1
-    
-    #Calculate the dual (base zero)
-    dual = binomial(n, k) - rank
-    
-    #Gets combinadic of dual
-    combination = combinadic(n, k, dual)
 
-    i = 1
-    while i <= k
-        #Map to zero-based combination
-        combination[i] = dualOfZero - combination[i]
-
-        #Add 1 (for base 1)
-        combination[i] += 1
-        i += 1
-    end
-
-    return combination
-end
-
-#Calculates zero-based array of c such that maxRank = (c1 choose k-1) + (c2 choose k-2) + ... (c[of k-1] choose 1)
-function combinadic(n, k, maxRank)
-    result = Array{Int}(undef, k)
-    diminishingRank = maxRank
-    reducingK = k
-
-    i = 1
-    while i <= k #TODO Debug, returning wrong values for [9,4]
-        result[i] = largestValue(n, reducingK, diminishingRank)   
-        diminishingRank -= binomial(result[i], reducingK)
-        reducingK -= 1
-        i += 1
-    end
-    return result
-end
-
-#Returns the highest rank of n2 choose k2 that is less than the threshold
-function largestValue(n2, k2, threshold)
-    v = n2 - 1   
-    while binomial(v,k2) > threshold
-      v -= 1
-    end
-    return v
+    return permutation
 end
 
 function binomialCheck(row)
@@ -176,11 +132,11 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n::Int128 = 99
-    k::Int128 = 14
+    n::Int128 = 9
+    k::Int128 = 4
     start  = 1#50000000
     finish = 200
-    rank = 1
+    rank = 10
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
     
@@ -197,7 +153,7 @@ function main()
     append!(middleRow, repeat([1,0], Int((n-1)/2)))
     
     row = makeRow(n, k, rank)
-    combinations = allCombinations(n, k)
+    combinations = allPermutations(n, k)
     actual = binomialCheck(row)
 
     target = combinations[rank]

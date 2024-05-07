@@ -1,7 +1,7 @@
 #Current intent - make method that directly generates (generateGraph() calls makeRow()) Adjacency Matrix to manipulate more efficiently in check2()
 #Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
-using Random, Combinatorics
+using Random, Combinatorics, BitBasis
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using CUDA
@@ -69,7 +69,10 @@ function allPermutations(n::Int128, k::Int128)
     limit::Int128 = 2^n 
     i::Int128 = 1
     while (set < limit)
-        checkPermutation(set, n)
+        valid = checkPermutation(set, n)
+        if valid
+            return set
+        end
         #Gosper's hack:
         c = set & - set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -81,8 +84,29 @@ end
 
 function checkPermutation(set, n)
     #TODO Check each permutation of first row and following rows
-    firstRow = reverse(digits(set, base = 2, pad = n))
-    
+    firstRow = set 
+    bitLocations = baddrs(firstRow)
+
+    #If there is a loop, return 
+    if n in bitLocations
+        return false
+    end
+
+    #Set length to the first half of the 2d array, minus the middle row if applicable
+    length = 0
+    if n % 2 == 0
+        length = n/2
+    else
+        length = ((n-1)/2) - 1
+    end
+
+
+    for i::Int in length
+        #TODO pick next row based on bitmasks
+        bmask(Int, i)
+    end
+
+    return true
 end
 
 function bruteForce(vertices, degree, start, finish)
@@ -119,8 +143,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n::Int128 = 20
-    k::Int128 = 6
+    n::Int128 = 5
+    k::Int128 = 2
     start  = 1#50000000
     finish = 200
     #Graph to pass to GPU (use CuArray in main)
@@ -140,6 +164,6 @@ function main()
     #append!(middleRow, repeat([1,0], Int((n-1)/2)))
 
     #@btime allPermutations($n,$k)
-    @time allPermutations(n, k)
+    allPermutations(n, k)
 end
 main()

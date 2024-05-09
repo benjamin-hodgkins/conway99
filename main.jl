@@ -1,7 +1,8 @@
-#Current intent - make method that directly generates (generateGraph() calls makeRow()) Adjacency Matrix to manipulate more efficiently in check2()
+#Current intent - allPermutations() checks each permutation of the first row with valid following rows with checkPermutation() 
+# This then goes into check2() to check the full adjacency matrix
 #Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
-using Random, Combinatorics, BitBasis
+using Random, Combinatorics
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using CUDA
@@ -81,29 +82,46 @@ function allPermutations(n::Int128, k::Int128)
     end 
 end
 
+#Gets locations of flipped bits in b
+function bitLocations(b::Integer)
+    flippedBits = ones(Int, count_ones(b))
+    j = 1
+    bStr = digits(b, base=2)
+    for i in range(1,length(bStr))
+        if bStr[i] == 1
+            flippedBits[j] = i
+            j += 1
+        end
+    end
+    return flippedBits
+end
 
 function checkPermutation(set, n)
     #TODO Check each permutation of first row and following rows
-    firstRow = set 
-    bitLocations = baddrs(firstRow)
+    bits = bitLocations(set)
+    firstRow = reverse(digits(set, base=2, pad=n))
 
     #If there is a loop, return 
-    if n in bitLocations
+    if n in bits
         return false
     end
 
     #Set length to the first half of the 2d array, minus the middle row if applicable
-    length = 0
+    length::Int = 0
     if n % 2 == 0
-        length = n/2
+        length::Int = n / 2  
     else
-        length = ((n-1)/2) - 1
+        length::Int = ((n-1) / 2) - 1
     end
 
+    # TODO make sure length is Int
+    adj_mat = Vector{Int8}(undef, length)
+    adj_mat[1:n] = firstRow
 
     for i::Int in length
         #TODO pick next row based on bitmasks
-        bmask(Int, i)
+        nextRow = 
+        adj_mat[i*n:i*n+n] = nextRow
     end
 
     return true

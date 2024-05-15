@@ -99,7 +99,7 @@ end
 function checkPermutation(set, n)
     #TODO Check each permutation of first row and following rows
     bits = bitLocations(set)
-    firstRow = reverse(digits(Int8, set, base=2, pad=n))
+    firstRow = reverse(digits(Int, set, base=2, pad=n))
 
     #If there is a loop, return 
     if n in bits
@@ -107,20 +107,34 @@ function checkPermutation(set, n)
     end
 
     #Set length to the first half of the 2d array, minus the middle row if applicable
-    length::Int = 0
+    lengthofArray::Int = 0
     if n % 2 == 0 
-        length = n / 2
+        lengthofArray = n / 2
     else
-        length = (n - 1) / 2
+        lengthofArray = (n - 1) / 2
     end
 
-    adj_mat = zeros(Int8, length, n)
+    #Initialize first row and start counting degrees of vertices
+    adj_mat = zeros(Int, lengthofArray, n)
     adj_mat[1, :] = firstRow
-    
-    for i::Int in length #TODO Skip first row
+    previousRow = firstRow
+    degreeDict = Dict{Int, Int}()
+
+    for i::Int in 1:length(firstRow)
+        if firstRow[i] == 1
+            degreeDict[i] = 1
+        else
+            degreeDict[i] = 0
+        end
+    end
+
+    #Calculate first half of graph 
+    for i::Int in 2:lengthofArray 
         #TODO pick next row based on bitmasks
-        nextRow = digits(Int8, set, base=2, pad=n)
-        adj_mat[i,:] = nextRow
+        
+        row = digits(Int, set, base=2, pad=n)
+        adj_mat[i,:] = row
+        previousRow = row
     end
     display(adj_mat)
     return true

@@ -101,8 +101,8 @@ function checkPermutation(set, n)
     bits = bitLocations(set)
     firstRow = reverse(digits(Int, set, base=2, pad=n))
 
-    #If there is a loop, return 
-    if n in bits
+    #If there is a loop in postion one, return (invalid string to check)
+    if bits[1] == 1
         return false
     end
 

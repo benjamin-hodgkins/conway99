@@ -10,7 +10,6 @@ using Test
 
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
 function paley9()
-
     adj_mat = Array{Int8}([
         0 1 1 1 0 0 1 0 0;
         1 0 0 0 1 0 1 1 0;
@@ -128,7 +127,8 @@ function checkPermutation(set, n)
         end
     end
 
-    #Calculate first half of graph 
+    #Calculate first side of graph 
+    #TODO Transpose variation of algorithm
     for i::Int in 2:lengthofArray 
         #TODO pick next row based on bitmasks
         
@@ -189,10 +189,6 @@ function main()
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
-
-    #TODO Make first half of graph, insert middleRow, copy first half and reverse for last half
-    middleRow = [Int8(0)]
-    append!(middleRow, repeat([1, 0], Int((n - 1) / 2))) #TODO Wrong
 
     #@btime allPermutations($n,$k)
     allPermutations(n, k)

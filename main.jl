@@ -65,20 +65,23 @@ end
 function allPermutations(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     # https://iamkate.com/code/hakmem-item-175/
+    combs = []
     set::Int128 = 2^k - 1
     limit::Int128 = 2^n
     i::Int128 = 1
     while (set < limit)
-        valid = checkPermutation(set, n)
-        if valid
-            return set
-        end
+        #valid = checkPermutation(set, n)
+        #if valid
+        #    return set
+        #end
+        push!(combs, set)
         #Gosper's hack:
         c = set & -set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
         set = (((r ⊻ set) >> 2) ÷ c) | r # take the other bits of the rightmost cluster of 1 bits and place them as far to the right as possible 
         i += 1
     end
+    return combs
 end
 
 #Gets locations of flipped bits in b
@@ -131,7 +134,7 @@ function checkPermutation(set, n)
     #TODO Transpose variation of algorithm
     for i::Int in 2:lengthofArray 
         #TODO pick next row based on bitmasks
-        
+        #TODO Sequence might be {7,4} 15, 23, 
         row = digits(Int, set, base=2, pad=n)
         adj_mat[i,:] = row
         previousRow = row
@@ -174,8 +177,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 5
-    k = 2
+    n = 7
+    k = 4
     start = 1#50000000
     finish = 200
     #Graph to pass to GPU (use CuArray in main)
@@ -191,7 +194,12 @@ function main()
     #@btime random_regular_graph($V, $D)
 
     #@btime allPermutations($n,$k)
-    allPermutations(n, k)
+    perms = allPermutations(n, k)
+    j = 1
+    for i in perms
+        println(string(i) * " " * string(j) * " " * string(reverse(digits(i, base = 2, pad=n))))
+        j+=1
+    end
 
 end
 main()

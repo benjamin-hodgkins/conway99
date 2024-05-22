@@ -144,34 +144,29 @@ function checkPermutation(set, n)
 end
 
 function bruteForce(vertices, degree, start, finish)
-    found = 0
     #Multithreading
     Threads.@threads for i in range(start, finish)
         g = random_regular_graph(vertices, degree, seed=i)
         if check(g, vertices) == true
             fName = "Winner(1)! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
-            found += 1
-            #return true
+            return true
         end
     end
-    return found
-    #return false
+    return false
 end
 
 function bruteForce2(vertices, degree, start, finish)
-    found = 0
     #Multithreading
     Threads.@threads for i in range(start, finish)
         g = generateGraph(vertices, degree, i)
         if check2(g) == true
             fName = "Winner(2)! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
-            found += 1
-            #return true
+            return true
         end
     end
-    return found #return false
+    return false
 end
 
 #The graph should have 99 vertices
@@ -181,29 +176,33 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 7
+    n = 9
     k = 4
     start = 1#50000000
-    finish = 200
+    finish = 100
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
 
     #Compare brute force methods
     #@btime bruteForce($V, $D, $start, $finish)
     #@btime bruteForce2($V, $D, $start, $finish)
-    #@time bruteForce(99, 14, start, finish)
+    #@time bruteForce(n, k, start, finish)
     #@printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start)
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)
 
     #@btime allPermutations($n,$k)
-    #perms = allPermutations(n, k)
-    #j = 1
-    #for i in perms
-    #    println(string(i) * " " * string(j) * " " * string(reverse(digits(i, base = 2, pad=n))))
-     #   j+=1
-    #end
+    perms = allPermutations(n, k)
+    j = 1
+    for i in perms
+        println(string(i) * " " * string(j) * " " * string(reverse(digits(i, base = 2, pad=n))))
+        j+=1
+    end
 
+    if isfile("Winner(1)! Seed - 19.lgz")
+        #g = loadgraph("Winner(1)! Seed - 19.lgz")
+        #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
+    end
 end
 main()

@@ -144,30 +144,34 @@ function checkPermutation(set, n)
 end
 
 function bruteForce(vertices, degree, start, finish)
+    found = 0
     #Multithreading
     Threads.@threads for i in range(start, finish)
         g = random_regular_graph(vertices, degree, seed=i)
         if check(g, vertices) == true
             fName = "Winner(1)! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
-            return true
+            found += 1
+            #return true
         end
     end
-    return false
+    return found
+    #return false
 end
 
 function bruteForce2(vertices, degree, start, finish)
-
+    found = 0
     #Multithreading
     Threads.@threads for i in range(start, finish)
         g = generateGraph(vertices, degree, i)
         if check2(g) == true
             fName = "Winner(2)! Seed - " * string(i) * (".lgz")
             savegraph(fName, g)
-            return true
+            found += 1
+            #return true
         end
     end
-    return false
+    return found #return false
 end
 
 #The graph should have 99 vertices
@@ -194,12 +198,12 @@ function main()
     #@btime random_regular_graph($V, $D)
 
     #@btime allPermutations($n,$k)
-    perms = allPermutations(n, k)
-    j = 1
-    for i in perms
-        println(string(i) * " " * string(j) * " " * string(reverse(digits(i, base = 2, pad=n))))
-        j+=1
-    end
+    #perms = allPermutations(n, k)
+    #j = 1
+    #for i in perms
+    #    println(string(i) * " " * string(j) * " " * string(reverse(digits(i, base = 2, pad=n))))
+     #   j+=1
+    #end
 
 end
 main()

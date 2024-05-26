@@ -83,44 +83,22 @@ function allPermutations(n, k)
     return combs
 end
 
-#Gets locations of flipped bits in b
-function bitLocations(b::Integer)
-    flippedBits = ones(Int, count_ones(b))
-    j = 1
-    bStr = digits(b, base=2)
-    for i in range(1, length(bStr))
-        if bStr[i] == 1
-            flippedBits[j] = i
-            j += 1
-        end
-    end
-    return flippedBits
-end
-
 function checkPermutation(set, n)
-
     #If there is a loop in postion one, return (invalid permutation to check)
-    bits = bitLocations(set)
+    bits = digits(Int, set, base=2, pad=n)
     if bits[1] == 1
-        return false
-    end
-
-    #Set length to the first half of the 2d array, minus the middle row if applicable
-    lengthofArray::Int = 0
-    if n % 2 == 0 
-        lengthofArray = n / 2
-    else
-        lengthofArray = (n - 1) / 2
+        #return false
     end
 
     #Initialize first and last rows and start counting degrees of vertices
-    firstRow = reverse(digits(Int, set, base=2, pad=n))
-    adj_mat = zeros(Int, lengthofArray, n)
+    firstRow = reverse(bits)
+    adj_mat = zeros(Int, n, n)
     adj_mat[1, :] = firstRow
+    adj_mat[end, :] = bits
     previousRow = firstRow
-    
     degreeDict = Dict{Int, Int}()
-    println(firstRow)
+
+    
     for i::Int in 1:length(firstRow)
         if firstRow[i] == 1
             degreeDict[i] = 1
@@ -130,13 +108,13 @@ function checkPermutation(set, n)
     end
 
     #TODO Algorithm from notebook
-    for i::Int in 2:lengthofArray
-        for j::Int in 1:lengthofArray
-            #row = digits(Int, set, base=2, pad=n)
-            #adj_mat[i,:] = row
+    for i::Int in 2:n
+        for j::Int in 1:n
+            
         end
-        previousRow = row
+        #previousRow = currentRow
     end
+    display(adj_mat)
     #return true
 end
 
@@ -193,7 +171,7 @@ function main()
 
 
     #perms = allPermutations(n, k)
-    checkPermutation(2^k-1, n)
+    checkPermutation(15, n)
     if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

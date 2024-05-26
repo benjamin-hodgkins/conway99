@@ -5,7 +5,7 @@
 using Random, Combinatorics
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
-using CUDA
+#using CUDA
 using Test
 
 #Returns Adjacency matrix of {9,4,1,2} (Paley 9)
@@ -70,11 +70,10 @@ function allPermutations(n, k)
     limit::Int128 = 2^n
     i::Int128 = 1
     while (set < limit)
-        #valid = checkPermutation(set, n)
-        #if valid
-        #    return set
-        #end
-        push!(combs, set)
+        valid = checkPermutation(set, n)
+        if valid
+            return set
+        end
         #Gosper's hack:
         c = set & -set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -99,11 +98,9 @@ function bitLocations(b::Integer)
 end
 
 function checkPermutation(set, n)
-    #TODO Check each permutation of first row and following rows
-    bits = bitLocations(set)
-    firstRow = reverse(digits(Int, set, base=2, pad=n))
 
-    #If there is a loop in postion one, return (invalid string to check)
+    #If there is a loop in postion one, return (invalid permutation to check)
+    bits = bitLocations(set)
     if bits[1] == 1
         return false
     end
@@ -116,12 +113,14 @@ function checkPermutation(set, n)
         lengthofArray = (n - 1) / 2
     end
 
-    #Initialize first row and start counting degrees of vertices
+    #Initialize first and last rows and start counting degrees of vertices
+    firstRow = reverse(digits(Int, set, base=2, pad=n))
     adj_mat = zeros(Int, lengthofArray, n)
     adj_mat[1, :] = firstRow
     previousRow = firstRow
+    
     degreeDict = Dict{Int, Int}()
-
+    println(firstRow)
     for i::Int in 1:length(firstRow)
         if firstRow[i] == 1
             degreeDict[i] = 1
@@ -130,17 +129,15 @@ function checkPermutation(set, n)
         end
     end
 
-    #Calculate first side of graph 
-    #TODO Transpose variation of algorithm
-    for i::Int in 2:lengthofArray 
-        #TODO pick next row based on bitmasks
-        #TODO Sequence might be {7,4} 15, 23, 
-        row = digits(Int, set, base=2, pad=n)
-        adj_mat[i,:] = row
+    #TODO Algorithm from notebook
+    for i::Int in 2:lengthofArray
+        for j::Int in 1:lengthofArray
+            #row = digits(Int, set, base=2, pad=n)
+            #adj_mat[i,:] = row
+        end
         previousRow = row
     end
-    display(adj_mat)
-    return true
+    #return true
 end
 
 function bruteForce(vertices, degree, start, finish)
@@ -176,7 +173,7 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 9
+    n = 7
     k = 4
     start = 1#50000000
     finish = 100
@@ -193,13 +190,10 @@ function main()
     #@btime random_regular_graph($V, $D)
 
     #@btime allPermutations($n,$k)
-    perms = allPermutations(n, k)
-    j = 1
-    for i in perms
-        println(string(i) * " " * string(j) * " " * string(reverse(digits(i, base = 2, pad=n))))
-        j+=1
-    end
 
+
+    #perms = allPermutations(n, k)
+    checkPermutation(2^k-1, n)
     if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

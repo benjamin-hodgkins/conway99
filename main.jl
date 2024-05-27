@@ -103,7 +103,7 @@ function checkPermutation(set, n, k)
     degreeDict = Dict{Int, Int}()
 
     #TODO add extra 1s to degreeDictS
-    for i::Int in 1:length(adj_mat)
+    for i::Int in 1:length(firstRow)
         if firstRow[i] == 1
             degreeDict[i] = 1
         else

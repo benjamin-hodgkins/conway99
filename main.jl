@@ -102,7 +102,8 @@ function checkPermutation(set, n, k)
     adj_mat = transpose(adj_mat) + adj_mat
     degreeDict = Dict{Int, Int}()
 
-    for i::Int in 1:length(firstRow)
+    #TODO add extra 1s to degreeDictS
+    for i::Int in 1:length(adj_mat)
         if firstRow[i] == 1
             degreeDict[i] = 1
         else
@@ -126,7 +127,6 @@ function checkPermutation(set, n, k)
             inv_row = n-j+1
             inv_col = n-i+1
             inv_position = adj_mat[inv_row, inv_col]
-
             
             #Don't flip if it would make a loop
             #Don't flip if col is already regular
@@ -150,6 +150,7 @@ function checkPermutation(set, n, k)
         end
     end
     display(adj_mat)
+    display(degreeDict)
     #return true
 end
 
@@ -186,8 +187,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 5
-    k = 2
+    n = 7
+    k = 4
     start = 1#50000000
     finish = 100
     #Graph to pass to GPU (use CuArray in main)

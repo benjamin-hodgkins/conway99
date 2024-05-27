@@ -197,8 +197,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 9
-    k = 6
+    n = 10
+    k = 4
     numGraphs = numRandomGraphs(n, k)
     start = 1 #50000000
     finish = BigInt(numGraphs)
@@ -210,8 +210,10 @@ function main()
     #Compare brute force methods
     #@btime bruteForce($n, $k, $start, $finish)
     #@btime bruteForce2($n, $k, $start, $finish)
-    @time bruteForce(n, k, start, finish)
+    #TODO Fix timer printout
+    graphTime = @elapsed bruteForce(n, k, start, finish)
     @printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start)
+    @printf("Time per graph checked: %d, Total Time: %d\n", graphTime / (finish-start), graphTime)
 
     #Compare graph generation 
     #@btime random_regular_graph($V, $D)

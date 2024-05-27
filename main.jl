@@ -65,40 +65,42 @@ end
 function allPermutations(n, k)
     # https://programmingforinsomniacs.blogspot.com/2018/03/gospers-hack-explained.html
     # https://iamkate.com/code/hakmem-item-175/
-    combs = []
+    perms = []
     set::Int128 = 2^k - 1
     limit::Int128 = 2^n
     i::Int128 = 1
     while (set < limit)
-        valid = checkPermutation(set, n)
-        if valid
-            return set
-        end
+        #valid = checkPermutation(set, n, k)
+        #if valid
+        #    return set
+        #end
+        push!(perms, set)
         #Gosper's hack:
         c = set & -set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
         set = (((r ⊻ set) >> 2) ÷ c) | r # take the other bits of the rightmost cluster of 1 bits and place them as far to the right as possible 
         i += 1
     end
-    return combs
+    return perms
 end
 
-function checkPermutation(set, n)
-    #If there is a loop in postion one, return (invalid permutation to check)
+function checkPermutation(set, n, k)
+    
+    #Initialize first and last rows and start counting degrees of vertices
     bits = digits(Int, set, base=2, pad=n)
-    if bits[1] == 1
-        #return false
+    firstRow = reverse(bits)
+
+    #If there is a loop in postion one, return (invalid permutation to check) 
+    if firstRow[1] == 1
+        return false
     end
 
-    #Initialize first and last rows and start counting degrees of vertices
-    firstRow = reverse(bits)
+    lastRow = bits
     adj_mat = zeros(Int, n, n)
     adj_mat[1, :] = firstRow
-    adj_mat[end, :] = bits
-    previousRow = firstRow
+    adj_mat[end, :] = lastRow
     degreeDict = Dict{Int, Int}()
 
-    
     for i::Int in 1:length(firstRow)
         if firstRow[i] == 1
             degreeDict[i] = 1
@@ -108,11 +110,41 @@ function checkPermutation(set, n)
     end
 
     #TODO Algorithm from notebook
-    for i::Int in 2:n
+    #Flips bits that don't violate condtions
+    #Continues otherwise since array is initialized with all 0s
+    rowLength::Int = (n+n%2)/2
+
+    for i::Int in 2:rowLength
         for j::Int in 1:n
-            
+            #If the current row is regular, go to the next row
+            if degreeDict[i] == k
+                break
+            end
+            position = adj_mat[i,j]
+            connection = adj_mat[j,i]
+            inv_position = adj_mat[n-i+1, n-j+1]
+            #Don't flip if it would make a loop
+            #Don't flip if col is already regular
+            if i != j && degreeDict[j] != k
+                #If already flipped, continue
+                if position == 1
+                    continue
+                end
+                #Flip if connection or inverse position is already flipped
+                if connection == 1 || inv_position == 1 #TODO makd sure inverse position is working
+                    adj_mat[i,j] = 1 
+                    degreeDict[i] += 1
+                end
+                #TODO Other conditions for flip
+            else 
+                 continue    
+            end
         end
-        #previousRow = currentRow
+
+        #Set n-i+1 row to reverse(i-row), if not middle row (when n is odd)
+        if i != rowLength
+            adj_mat[n-i+1, :] = reverse(adj_mat[i, :])
+        end
     end
     display(adj_mat)
     #return true
@@ -151,8 +183,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 7
-    k = 4
+    n = 5
+    k = 2
     start = 1#50000000
     finish = 100
     #Graph to pass to GPU (use CuArray in main)
@@ -170,8 +202,8 @@ function main()
     #@btime allPermutations($n,$k)
 
 
-    #perms = allPermutations(n, k)
-    checkPermutation(15, n)
+    println(allPermutations(n, k))
+    checkPermutation(12, n, k)
     if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)

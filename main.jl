@@ -98,7 +98,8 @@ function checkPermutation(set, n, k)
     lastRow = bits
     adj_mat = zeros(Int, n, n)
     adj_mat[1, :] = firstRow
-    adj_mat[end, :] = lastRow
+    adj_mat[end, :] = lastRow 
+    adj_mat = transpose(adj_mat) + adj_mat
     degreeDict = Dict{Int, Int}()
 
     for i::Int in 1:length(firstRow)
@@ -122,7 +123,11 @@ function checkPermutation(set, n, k)
             end
             position = adj_mat[i,j]
             connection = adj_mat[j,i]
-            inv_position = adj_mat[n-i+1, n-j+1]
+            inv_row = n-j+1
+            inv_col = n-i+1
+            inv_position = adj_mat[inv_row, inv_col]
+
+            
             #Don't flip if it would make a loop
             #Don't flip if col is already regular
             if i != j && degreeDict[j] != k
@@ -130,8 +135,11 @@ function checkPermutation(set, n, k)
                 if position == 1
                     continue
                 end
+
                 #Flip if connection or inverse position is already flipped
-                if connection == 1 || inv_position == 1 #TODO makd sure inverse position is working
+                if connection == 1 || inv_position == 1
+                    adj_mat[inv_row, inv_col] = 1
+                    degreeDict[inv_row] = 1
                     adj_mat[i,j] = 1 
                     degreeDict[i] += 1
                 end
@@ -139,11 +147,6 @@ function checkPermutation(set, n, k)
             else 
                  continue    
             end
-        end
-
-        #Set n-i+1 row to reverse(i-row), if not middle row (when n is odd)
-        if i != rowLength
-            adj_mat[n-i+1, :] = reverse(adj_mat[i, :])
         end
     end
     display(adj_mat)
@@ -201,8 +204,6 @@ function main()
 
     #@btime allPermutations($n,$k)
 
-
-    println(allPermutations(n, k))
     checkPermutation(12, n, k)
     if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")

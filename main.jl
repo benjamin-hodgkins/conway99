@@ -3,6 +3,7 @@
 #Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
 using Random, Combinatorics
+#using Oscar
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using Printf
@@ -197,12 +198,16 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 99
-    k = 14
-    @time numGraphs = numRandomGraphs(n, k)
+    n = 9
+    k = 4
+    numGraphs = numRandomGraphs(n, k)
     start = 1 #50000000
-    finish = 1000#BigInt(numGraphs)
-    
+    finish = 0
+    if n < 10 
+        finish = BigInt(numGraphs)
+    else 
+        finish = 10000
+    end
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
 
@@ -210,19 +215,21 @@ function main()
     #Compare brute force methods
     #@btime bruteForce($n, $k, $start, $finish)
     #@btime bruteForce2($n, $k, $start, $finish)
-    #TODO Fix timer printout
-    @time bruteForce(n, k, start, finish)
-    @printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start + 1)
-    #@printf("Time per graph checked: %d, Total Time: %d\n", graphTime / (finish-start), graphTime)
 
-    #Compare graph generation 
-    #@btime random_regular_graph($V, $D)
+    #Time generation methods
+    #graphTime = @elapsed bruteForce(n, k, start, finish)
+    #@printf("Checked: %i : %i, Total: %i\n", start, finish, finish-start + 1)
+    #@printf("Graphs checked per second: %.2f, Total Time: %.3fs\n", (finish-start) / graphTime, graphTime)
 
-    #@btime allPermutations($n,$k)
-
+    #TODO Check if each permutation of n,k has a unique graph
+    #TODO Probablistic data structure (hyperloglog?)
+    #https://pallini.di.uniroma1.it/Introduction.html#lev1
+    #Automorphism group of order 2 or 3 
+    #https://en.wikipedia.org/wiki/Graph_automorphism
+    #https://pure.tue.nl/ws/portalfiles/portal/2449333/256699.pdf
+    #TODO Try Oscar.jl on linux
     #checkPermutation(12, n, k)
-    
-        if isfile("Winner(1)! Seed - 19.lgz")
+    if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
     end

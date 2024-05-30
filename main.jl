@@ -3,7 +3,7 @@
 #Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
 using Random, Combinatorics
-#using Oscar
+using Oscar
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using Printf

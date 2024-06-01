@@ -206,8 +206,9 @@ function main()
     if n < 10 
         finish = BigInt(numGraphs)
     else 
-        finish = 10000
+        finish = 1000
     end
+    
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
 
@@ -222,12 +223,14 @@ function main()
     #@printf("Graphs checked per second: %.2f, Total Time: %.3fs\n", (finish-start) / graphTime, graphTime)
 
     #TODO Check if each permutation of n,k has a unique graph
-    #TODO Probablistic data structure (hyperloglog?)
+    #TODO Probablistic data structure (hyperloglog? minHash?)
     #https://pallini.di.uniroma1.it/Introduction.html#lev1
     #Automorphism group of order 2 or 3 
     #https://en.wikipedia.org/wiki/Graph_automorphism
     #https://pure.tue.nl/ws/portalfiles/portal/2449333/256699.pdf
-    #TODO Try Oscar.jl on linux
+    #TODO Try Oscar.jl on linux g = random_regular_graph(n,k)
+    
+    println(automorphism_group_generators(graph_from_adjacency_matrix(Undirected, paley)))
     #checkPermutation(12, n, k)
     if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")

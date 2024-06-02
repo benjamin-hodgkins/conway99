@@ -229,8 +229,11 @@ function main()
     #https://en.wikipedia.org/wiki/Graph_automorphism
     #https://pure.tue.nl/ws/portalfiles/portal/2449333/256699.pdf
     #TODO Try Oscar.jl on linux g = random_regular_graph(n,k)
-    
-    println(automorphism_group_generators(graph_from_adjacency_matrix(Undirected, paley)))
+    println(typeof(paley))
+    conway = Matrix(adjacency_matrix(random_regular_graph(99,14)))
+    println(typeof(conway))
+
+    println(automorphism_group(graph_from_adjacency_matrix(Undirected, conway)))
     #checkPermutation(12, n, k)
     if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")

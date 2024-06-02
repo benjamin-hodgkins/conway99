@@ -112,20 +112,28 @@ function checkPermutation(set, n, k)
     adj_mat[end, :] = lastRow 
     adj_mat = transpose(adj_mat) + adj_mat
     degreeDict = Dict{Int, Int}()
+    rowLength::Int = (n+n%2)/2
 
-    #TODO add extra 1s to degreeDictS
-    for i::Int in 1:length(firstRow)
-        if firstRow[i] == 1
-            degreeDict[i] = 1
-        else
-            degreeDict[i] = 0
+    #TODO add extra 1s to degreeDict (Why is this failing at 2,2????)
+    for i::Int in 1:n
+        for j::Int in 1:n
+            if !haskey(degreeDict, j)
+                degreeDict[j] = 0
+            else
+                if adj_mat[i][j] == 1
+                    degreeDict[j] += 1
+                else
+                    continue
+                end
+            end
         end
     end
-
+    display(adj_mat)
+    return degreeDict
     #TODO Algorithm from notebook
     #Flips bits that don't violate condtions
     #Continues otherwise since array is initialized with all 0s
-    rowLength::Int = (n+n%2)/2
+    
 
     for i::Int in 2:rowLength
         for j::Int in 1:n
@@ -160,7 +168,7 @@ function checkPermutation(set, n, k)
             end
         end
     end
-    display(adj_mat)
+    
     display(degreeDict)
     #return true
 end
@@ -198,8 +206,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 9
-    k = 4
+    n = 5
+    k = 2
     numGraphs = numRandomGraphs(n, k)
     start = 1 #50000000
     finish = 0
@@ -213,6 +221,10 @@ function main()
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
 
     @printf("Number of regular graphs of (%i, %i):  %.4e\n", n, k, numGraphs)
+    testDict = Dict(5 => 0, 4 => 1, 3 => 2, 2 => 1, 1 => 2)
+    @test checkPermutation(12, n, k) == testDict
+
+
     #Compare brute force methods
     #@btime bruteForce($n, $k, $start, $finish)
     #@btime bruteForce2($n, $k, $start, $finish)
@@ -228,16 +240,19 @@ function main()
     #Automorphism group of order 2 or 3 
     #https://en.wikipedia.org/wiki/Graph_automorphism
     #https://pure.tue.nl/ws/portalfiles/portal/2449333/256699.pdf
-    #TODO Try Oscar.jl on linux g = random_regular_graph(n,k)
-    println(typeof(paley))
-    conway = Matrix(adjacency_matrix(random_regular_graph(99,14)))
-    println(typeof(conway))
 
-    println(automorphism_group(graph_from_adjacency_matrix(Undirected, conway)))
-    #checkPermutation(12, n, k)
-    if isfile("Winner(1)! Seed - 19.lgz")
+
+    #TODO Try Oscar.jl on linux g = random_regular_graph(n,k)
+    #println(typeof(paley))
+    #conway = Matrix(adjacency_matrix(random_regular_graph(n,k)))
+    #println(typeof(conway))
+
+    #println(automorphism_group_generators(graph_from_adjacency_matrix(Undirected, conway)))
+    
+    #if isfile("Winner(1)! Seed - 19.lgz")
         #g = loadgraph("Winner(1)! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
-    end
+    #end
 end
 main()
+

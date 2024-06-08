@@ -112,29 +112,25 @@ function checkPermutation(set, n, k)
     adj_mat[end, :] = lastRow 
     adj_mat = transpose(adj_mat) + adj_mat
     degreeDict = Dict{Int, Int}()
+    for i::Int in 1:n
+        degreeDict[i] = 0
+    end
     rowLength::Int = (n+n%2)/2
-
-    #TODO add extra 1s to degreeDict (Why is this failing at 2,2????)
+    
     for i::Int in 1:n
         for j::Int in 1:n
-            if !haskey(degreeDict, j)
-                degreeDict[j] = 0
+            if adj_mat[i,j] == 1
+                degreeDict[j] += 1
             else
-                if adj_mat[i][j] == 1
-                    degreeDict[j] += 1
-                else
-                    continue
-                end
+                continue
             end
         end
     end
-    display(adj_mat)
-    return degreeDict
+    
     #TODO Algorithm from notebook
     #Flips bits that don't violate condtions
     #Continues otherwise since array is initialized with all 0s
     
-
     for i::Int in 2:rowLength
         for j::Int in 1:n
             #If the current row is regular, go to the next row
@@ -163,6 +159,7 @@ function checkPermutation(set, n, k)
                     degreeDict[i] += 1
                 end
                 #TODO Other conditions for flip
+                #https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
             else 
                  continue    
             end
@@ -219,11 +216,6 @@ function main()
     
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
-
-    @printf("Number of regular graphs of (%i, %i):  %.4e\n", n, k, numGraphs)
-    testDict = Dict(5 => 0, 4 => 1, 3 => 2, 2 => 1, 1 => 2)
-    @test checkPermutation(12, n, k) == testDict
-
 
     #Compare brute force methods
     #@btime bruteForce($n, $k, $start, $finish)

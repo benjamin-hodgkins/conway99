@@ -1,7 +1,18 @@
-#Current intent - allPermutations() checks each permutation of the first row with valid following rows with checkPermutation() 
+# Current intent - allPermutations() checks each permutation of the first row with valid following rows with checkPermutation() 
 # This then goes into check2() to check the full adjacency matrix
-#Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
+# Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
+# "The answer is that the automorphism group is the collection of all graph automorphisms of a given graph with composition as its operation. 
+# The order is the number of automorphisms a graph has. An automorphism is a mapping of the nodes to nodes such that the edge structure is identical. 
+# Essentially, you swap around the locations of all the nodes such that the local edge structure around each node is the same as 
+# the edge structure prior to moving everything around"
+
+# "Order 2 means reflection, abstractly. It has an automorphism that takes the nodes to a new set of nodes and then applying that same automorphism again 
+# takes them back to the original configuration. Similarly, order 3 is a 3-way rotation"
+# "It doesn’t have more because it doesn’t have a much symmetry inherent to the structure of the graph"
+# and then -
+# "I think a way to think about it is that automorphisms are like symmetries, and large complicated objects tend to be less symmetrical. 
+# So 99, 14 is probably a large complicated object that is most likely not the composition of highly symmetric subgraphs for example"
 using Random, Combinatorics
 using Oscar
 using Graphs, GraphRecipes, Plots
@@ -106,11 +117,13 @@ function checkPermutation(set, n, k)
         return false
     end
 
+    #Initialize first and last rows and start counting degrees of vertices - continued
     lastRow = bits
     adj_mat = zeros(Int, n, n)
     adj_mat[1, :] = firstRow
     adj_mat[end, :] = lastRow 
     adj_mat = transpose(adj_mat) + adj_mat
+
     degreeDict = Dict{Int, Int}()
     for i::Int in 1:n
         degreeDict[i] = 0
@@ -128,6 +141,7 @@ function checkPermutation(set, n, k)
     end
     
     #TODO Algorithm from notebook
+    #TODO Backtracking Algorithm to check how many valid graphs per valid first row
     #Flips bits that don't violate condtions
     #Continues otherwise since array is initialized with all 0s
     
@@ -159,14 +173,14 @@ function checkPermutation(set, n, k)
                     degreeDict[i] += 1
                 end
                 #TODO Other conditions for flip
-                #https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
+                #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
             else 
                  continue    
             end
         end
     end
     
-    display(degreeDict)
+    display(adj_mat)
     #return true
 end
 
@@ -231,7 +245,6 @@ function main()
     #https://pallini.di.uniroma1.it/Introduction.html#lev1
     #Automorphism group of order 2 or 3 
     #https://en.wikipedia.org/wiki/Graph_automorphism
-    #https://pure.tue.nl/ws/portalfiles/portal/2449333/256699.pdf
 
 
     #TODO Try Oscar.jl on linux g = random_regular_graph(n,k)
@@ -245,6 +258,6 @@ function main()
         #g = loadgraph("Winner(1)! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
     #end
+    allPermutations(n, k)
 end
 main()
-

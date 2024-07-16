@@ -67,7 +67,7 @@ function check(graph, vertices)
     return true
 end
 
-#Checks properties of graph v2 (works with adjacency matrix)
+#Checks properties of graph v2 (works with adjacency matrix) #TODO Check only first half of graph
 function check2(adj_mat)
     num_neigh_mat = transpose(adj_mat) * adj_mat
     for i in range(1, length(adj_mat))
@@ -217,8 +217,8 @@ end
 function main()
     #TODO https://jenni-westoby.github.io/Julia_GPU_examples/dev/Vector_addition/
     paley = paley9()
-    n = 5
-    k = 2
+    n = 9
+    k = 4
     numGraphs = numRandomGraphs(n, k)
     start = 1 #50000000
     finish = 0
@@ -258,6 +258,8 @@ function main()
         #g = loadgraph("Winner(1)! Seed - 19.lgz")
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
     #end
-    allPermutations(n, k)
+
+    #allPermutations(n, k)
+    numRandomGraphs(n,k)
 end
 main()

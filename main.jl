@@ -109,77 +109,78 @@ end
 #Checks each possible permutation of the middle row 
 function checkPermutation(set, n, k)
 
-    #Initialize middle row and start counting degrees of vertices
-    bits = digits(Int, set, base=2, pad=Int((n-1)/2))
-    middleRow =  cat(bits, 0, reverse(bits), dims=1)
+    #Initialize middle row
+    bits = digits(Int, set, base=2, pad=Int((n - 1) / 2))
+    middleRow = cat(bits, 0, reverse(bits), dims=1)
     middleColumn = Int(((n - 1) / 2) + 1)
-    
+
     #If there is a loop in the middle col of the middle row, return (invalid permutation to check) 
     if middleRow[middleColumn] == 1
         return false
     end
 
-    #Initialize middle row and start counting degrees of vertices - continued
-    adj_mat = zeros(Int, n, n)
+    #Initialize matrix
+    adj_mat = fill(0, n, n)
     adj_mat[middleColumn, :] = middleRow
     adj_mat = transpose(adj_mat) + adj_mat
 
+    #Start counting degrees of vertices 
     degreeDict = Dict{Int,Int}()
     for i::Int in 1:n
         degreeDict[i] = 0
     end
-    rowLength::Int = (n + n % 2) / 2
 
+    #Iterate over adj_mat, add to degreeDict and set non-neighbors to -1 (Seidel_adjacency_matrix)
     for i::Int in 1:n
         for j::Int in 1:n
-            if adj_mat[i, j] == 1
+            if i != j && adj_mat[i, j] == 0
+                adj_mat[i,j] = -1
+            else
                 degreeDict[j] += 1
+            end
+        end
+    end
+
+    
+    # #Flips bits that don't violate condtions
+    # #Continues otherwise since array is initialized with all 0s
+    rowLength::Int = (n + n % 2) / 2
+    for i::Int in 2:rowLength
+        for j::Int in 1:n
+            #If the current row is regular, go to the next row
+            if degreeDict[i] == k
+                break
+            end
+            position = adj_mat[i, j]
+            connection = adj_mat[j, i]
+            inv_row = n - j + 1
+            inv_col = n - i + 1
+            inv_position = adj_mat[inv_row, inv_col]
+
+            #Don't flip if it would make a loop
+            #Don't flip if col is already regular
+            if i != j && degreeDict[j] != k
+                #If already flipped, continue
+                if position == 1
+                    continue
+                end
+
+                #Flip if connection or inverse position is already flipped
+                if connection == 1 || inv_position == 1
+                    adj_mat[inv_row, inv_col] = 1
+                    degreeDict[inv_row] = 1
+                    adj_mat[i, j] = 1
+                    degreeDict[i] += 1
+                end
+                #TODO Other conditions for flip
+                #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
             else
                 continue
             end
         end
     end
-    
+
     display(adj_mat)
-    # #Flips bits that don't violate condtions
-    # #Continues otherwise since array is initialized with all 0s
-
-    # for i::Int in 2:rowLength
-    #     for j::Int in 1:n
-    #         #If the current row is regular, go to the next row
-    #         if degreeDict[i] == k
-    #             break
-    #         end
-    #         position = adj_mat[i, j]
-    #         connection = adj_mat[j, i]
-    #         inv_row = n - j + 1
-    #         inv_col = n - i + 1
-    #         inv_position = adj_mat[inv_row, inv_col]
-
-    #         #Don't flip if it would make a loop
-    #         #Don't flip if col is already regular
-    #         if i != j && degreeDict[j] != k
-    #             #If already flipped, continue
-    #             if position == 1
-    #                 continue
-    #             end
-
-    #             #Flip if connection or inverse position is already flipped
-    #             if connection == 1 || inv_position == 1
-    #                 adj_mat[inv_row, inv_col] = 1
-    #                 degreeDict[inv_row] = 1
-    #                 adj_mat[i, j] = 1
-    #                 degreeDict[i] += 1
-    #             end
-    #             #TODO Other conditions for flip
-    #             #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
-    #         else
-    #             continue
-    #         end
-    #     end
-    # end
-
-    
     #return true
 end
 
@@ -258,7 +259,10 @@ function main()
     #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
     #end
 
-    #allPermutations(n, k/2)
+    perms = allPermutations(n, k/2)
+    for p in perms
+        #println(digits(p, base=2, pad = n))
+    end
     checkPermutation(3, n, k)
     #numRandomGraphs(n,k)
 end

@@ -108,6 +108,7 @@ end
 
 function checkPermutation(set, n, k)
     
+     #TODO Start with middle row
     #Initialize first and last rows and start counting degrees of vertices
     bits = digits(Int, set, base=2, pad=n)
     firstRow = reverse(bits)
@@ -140,8 +141,7 @@ function checkPermutation(set, n, k)
         end
     end
     
-    #TODO Algorithm from notebook
-    #TODO Backtracking Algorithm to check how many valid graphs per valid first row
+   
     #Flips bits that don't violate condtions
     #Continues otherwise since array is initialized with all 0s
     
@@ -259,7 +259,7 @@ function main()
         #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
     #end
 
-    #allPermutations(n, k)
-    numRandomGraphs(n,k)
+    allPermutations(n, k)
+    #numRandomGraphs(n,k)
 end
 main()

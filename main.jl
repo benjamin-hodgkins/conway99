@@ -41,10 +41,10 @@ end
 bigBinomial(n::Integer, k::Integer) = binomial(big(n), big(k))::BigInt
 # From https://arxiv.org/pdf/1702.08373
 function numRandomGraphs(n, d)
-    m::Int = (d*n)/2
-    top = bigBinomial(n-1, d)^n * bigBinomial(bigBinomial(n, 2), m)
-    bot = bigBinomial(n*(n-1), 2*m)
-    return round((top/bot) * (2.72^.25))
+    m::Int = (d * n) / 2
+    top = bigBinomial(n - 1, d)^n * bigBinomial(bigBinomial(n, 2), m)
+    bot = bigBinomial(n * (n - 1), 2 * m)
+    return round((top / bot) * (2.72^0.25))
 end
 #Checks properties of graph v1 (work with Julia graph type)
 function check(graph, vertices)
@@ -106,34 +106,33 @@ function allPermutations(n, k)
     return perms
 end
 
+#Checks each possible permutation of the middle row 
 function checkPermutation(set, n, k)
-    
-     #TODO Start with middle row
-    #Initialize first and last rows and start counting degrees of vertices
-    bits = digits(Int, set, base=2, pad=n)
-    firstRow = reverse(bits)
 
-    #If there is a loop in postion one, return (invalid permutation to check) 
-    if firstRow[1] == 1
+    #Initialize middle row and start counting degrees of vertices
+    bits = digits(Int, set, base=2, pad=Int((n-1)/2))
+    middleRow =  cat(bits, 0, reverse(bits), dims=1)
+    middleColumn = Int(((n - 1) / 2) + 1)
+    
+    #If there is a loop in the middle col of the middle row, return (invalid permutation to check) 
+    if middleRow[middleColumn] == 1
         return false
     end
 
-    #Initialize first and last rows and start counting degrees of vertices - continued
-    lastRow = bits
+    #Initialize middle row and start counting degrees of vertices - continued
     adj_mat = zeros(Int, n, n)
-    adj_mat[1, :] = firstRow
-    adj_mat[end, :] = lastRow 
+    adj_mat[middleColumn, :] = middleRow
     adj_mat = transpose(adj_mat) + adj_mat
 
-    degreeDict = Dict{Int, Int}()
+    degreeDict = Dict{Int,Int}()
     for i::Int in 1:n
         degreeDict[i] = 0
     end
-    rowLength::Int = (n+n%2)/2
-    
+    rowLength::Int = (n + n % 2) / 2
+
     for i::Int in 1:n
         for j::Int in 1:n
-            if adj_mat[i,j] == 1
+            if adj_mat[i, j] == 1
                 degreeDict[j] += 1
             else
                 continue
@@ -141,46 +140,46 @@ function checkPermutation(set, n, k)
         end
     end
     
-   
-    #Flips bits that don't violate condtions
-    #Continues otherwise since array is initialized with all 0s
-    
-    for i::Int in 2:rowLength
-        for j::Int in 1:n
-            #If the current row is regular, go to the next row
-            if degreeDict[i] == k
-                break
-            end
-            position = adj_mat[i,j]
-            connection = adj_mat[j,i]
-            inv_row = n-j+1
-            inv_col = n-i+1
-            inv_position = adj_mat[inv_row, inv_col]
-            
-            #Don't flip if it would make a loop
-            #Don't flip if col is already regular
-            if i != j && degreeDict[j] != k
-                #If already flipped, continue
-                if position == 1
-                    continue
-                end
-
-                #Flip if connection or inverse position is already flipped
-                if connection == 1 || inv_position == 1
-                    adj_mat[inv_row, inv_col] = 1
-                    degreeDict[inv_row] = 1
-                    adj_mat[i,j] = 1 
-                    degreeDict[i] += 1
-                end
-                #TODO Other conditions for flip
-                #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
-            else 
-                 continue    
-            end
-        end
-    end
-    
     display(adj_mat)
+    # #Flips bits that don't violate condtions
+    # #Continues otherwise since array is initialized with all 0s
+
+    # for i::Int in 2:rowLength
+    #     for j::Int in 1:n
+    #         #If the current row is regular, go to the next row
+    #         if degreeDict[i] == k
+    #             break
+    #         end
+    #         position = adj_mat[i, j]
+    #         connection = adj_mat[j, i]
+    #         inv_row = n - j + 1
+    #         inv_col = n - i + 1
+    #         inv_position = adj_mat[inv_row, inv_col]
+
+    #         #Don't flip if it would make a loop
+    #         #Don't flip if col is already regular
+    #         if i != j && degreeDict[j] != k
+    #             #If already flipped, continue
+    #             if position == 1
+    #                 continue
+    #             end
+
+    #             #Flip if connection or inverse position is already flipped
+    #             if connection == 1 || inv_position == 1
+    #                 adj_mat[inv_row, inv_col] = 1
+    #                 degreeDict[inv_row] = 1
+    #                 adj_mat[i, j] = 1
+    #                 degreeDict[i] += 1
+    #             end
+    #             #TODO Other conditions for flip
+    #             #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
+    #         else
+    #             continue
+    #         end
+    #     end
+    # end
+
+    
     #return true
 end
 
@@ -222,12 +221,12 @@ function main()
     numGraphs = numRandomGraphs(n, k)
     start = 1 #50000000
     finish = 0
-    if n < 10 
+    if n < 10
         finish = BigInt(numGraphs)
-    else 
+    else
         finish = 1000
     end
-    
+
     #Graph to pass to GPU (use CuArray in main)
     #graph = CuArray{Int}(undef, (degree + 2) * vertices)
 
@@ -253,13 +252,14 @@ function main()
     #println(typeof(conway))
 
     #println(automorphism_group_generators(graph_from_adjacency_matrix(Undirected, conway)))
-    
+
     #if isfile("Winner(1)! Seed - 19.lgz")
-        #g = loadgraph("Winner(1)! Seed - 19.lgz")
-        #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
+    #g = loadgraph("Winner(1)! Seed - 19.lgz")
+    #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
     #end
 
-    allPermutations(n, k)
+    #allPermutations(n, k/2)
+    checkPermutation(3, n, k)
     #numRandomGraphs(n,k)
 end
 main()

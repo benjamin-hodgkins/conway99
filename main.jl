@@ -14,7 +14,6 @@
 # "I think a way to think about it is that automorphisms are like symmetries, and large complicated objects tend to be less symmetrical. 
 # So 99, 14 is probably a large complicated object that is most likely not the composition of highly symmetric subgraphs for example"
 using Random, Combinatorics
-using Oscar
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
 using Printf
@@ -36,7 +35,24 @@ function paley9()
     ])
     return adj_mat
 end
-
+function prettyPrintMatrix(adj_mat)
+    #Pretty print matrix
+    for i in 1:size(adj_mat)[1]
+        for j in 1:size(adj_mat)[1]
+            if adj_mat[i,j] == -1
+                print(" ")
+                printstyled(adj_mat[i, j], color=:red)
+            elseif adj_mat[i,j] == 0
+                print("  ")
+                printstyled(adj_mat[i, j], color=:blue)
+            else
+                print("  ")
+                printstyled(adj_mat[i, j], color=:green)
+            end
+        end
+        println()
+    end
+end
 #Function to handle binomial overflow 
 bigBinomial(n::Integer, k::Integer) = binomial(big(n), big(k))::BigInt
 # From https://arxiv.org/pdf/1702.08373
@@ -141,7 +157,7 @@ function checkPermutation(set, n, k)
         end
     end
 
-    
+    #TODO
     # #Flips bits that don't violate condtions
     # #Continues otherwise since array is initialized with all 0s
     rowLength::Int = (n + n % 2) / 2
@@ -180,7 +196,7 @@ function checkPermutation(set, n, k)
         end
     end
 
-    display(adj_mat)
+    prettyPrintMatrix(adj_mat)
     #return true
 end
 

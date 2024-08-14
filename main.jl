@@ -1,18 +1,8 @@
 # Current intent - allPermutations() checks each permutation of the first row with valid following rows with checkPermutation() 
-# This then goes into check2() to check the full adjacency matrix
+# uses middle start algorithm
+# This then goes into check3() : TODO : to check the full adjacency matrix
 # Eventually this is too brute force search graphs of 99,14,1,2 preferably on GPU
 
-# "The answer is that the automorphism group is the collection of all graph automorphisms of a given graph with composition as its operation. 
-# The order is the number of automorphisms a graph has. An automorphism is a mapping of the nodes to nodes such that the edge structure is identical. 
-# Essentially, you swap around the locations of all the nodes such that the local edge structure around each node is the same as 
-# the edge structure prior to moving everything around"
-
-# "Order 2 means reflection, abstractly. It has an automorphism that takes the nodes to a new set of nodes and then applying that same automorphism again 
-# takes them back to the original configuration. Similarly, order 3 is a 3-way rotation"
-# "It doesn’t have more because it doesn’t have a much symmetry inherent to the structure of the graph"
-# and then -
-# "I think a way to think about it is that automorphisms are like symmetries, and large complicated objects tend to be less symmetrical. 
-# So 99, 14 is probably a large complicated object that is most likely not the composition of highly symmetric subgraphs for example"
 using Random, Combinatorics
 using Graphs, GraphRecipes, Plots
 using BenchmarkTools, Profile
@@ -158,8 +148,8 @@ function checkPermutation(set, n, k)
     end
 
     #TODO
-    # #Flips bits that don't violate condtions
-    # #Continues otherwise since array is initialized with all 0s
+    #Flips bits that don't violate condtions
+    #Continues otherwise since array is initialized with all 0s
     rowLength::Int = (n + n % 2) / 2
     for i::Int in 2:rowLength
         for j::Int in 1:n
@@ -261,19 +251,6 @@ function main()
     #https://pallini.di.uniroma1.it/Introduction.html#lev1
     #Automorphism group of order 2 or 3 
     #https://en.wikipedia.org/wiki/Graph_automorphism
-
-
-    #TODO Try Oscar.jl on linux g = random_regular_graph(n,k)
-    #println(typeof(paley))
-    #conway = Matrix(adjacency_matrix(random_regular_graph(n,k)))
-    #println(typeof(conway))
-
-    #println(automorphism_group_generators(graph_from_adjacency_matrix(Undirected, conway)))
-
-    #if isfile("Winner(1)! Seed - 19.lgz")
-    #g = loadgraph("Winner(1)! Seed - 19.lgz")
-    #graphplot(paley, method=:shell, nodesize=0.3, names=1:9, curves=false)
-    #end
 
     perms = allPermutations(n, k/2)
     for p in perms

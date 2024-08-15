@@ -102,7 +102,7 @@ function allPermutations(n, k)
         #if valid
         #    return set
         #end
-        push!(perms, set)
+        #push!(perms, set)
         #Gosper's hack:
         c = set & -set # c is equal to the rightmost 1-bit in set.
         r = set + c # Find the rightmost 1-bit that can be moved left into a 0-bit. Move it left one
@@ -148,27 +148,31 @@ function checkPermutation(set, n, k)
     end
 
     #TODO Make it work with middle algo
-    #Flips bits that don't violate condtions
-    #Continues otherwise since array is initialized with all 0s
-    rowLength::Int = (n + n % 2) / 2
-    for i::Int in 2:rowLength
+    rowsToCheck::Int = (n-1) / 2
+    for i::Int in 1:rowsToCheck
+        #TODO Check row by row, backtrack
+        #TODO Start with firs
+        #TODO Keep track of num_neighbors at the same time
+        #If the current row is regular, go to the next row
+        if degreeDict[i] == k
+            continue
+        end
+
+        #Set connection and inverse position if position is set
         for j::Int in 1:n
-            #If the current row is regular, go to the next row
-            if degreeDict[i] == k
-                break
-            end
             position = adj_mat[i, j]
             connection = adj_mat[j, i]
             inv_position = adj_mat[n - j + 1, n - i + 1]
 
-            
-                #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
-            else
-                continue
+            if position == 1
+                connection = 1
+                inv_position = 1
             end
         end
     end
-
+    
+    
+    #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
     prettyPrintMatrix(adj_mat)
     #return true
 end
@@ -235,11 +239,7 @@ function main()
     #Automorphism group of order 2 or 3 
     #https://en.wikipedia.org/wiki/Graph_automorphism
 
-    perms = allPermutations(n, k/2)
-    for p in perms
-        #println(digits(p, base=2, pad = n))
-    end
-    checkPermutation(3, n, k)
+    @time checkPermutation(3, n, k)
     #numRandomGraphs(n,k)
 end
 main()

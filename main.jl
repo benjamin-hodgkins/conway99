@@ -147,7 +147,7 @@ function checkPermutation(set, n, k)
         end
     end
 
-    #TODO
+    #TODO Make it work with middle algo
     #Flips bits that don't violate condtions
     #Continues otherwise since array is initialized with all 0s
     rowLength::Int = (n + n % 2) / 2
@@ -159,26 +159,9 @@ function checkPermutation(set, n, k)
             end
             position = adj_mat[i, j]
             connection = adj_mat[j, i]
-            inv_row = n - j + 1
-            inv_col = n - i + 1
-            inv_position = adj_mat[inv_row, inv_col]
+            inv_position = adj_mat[n - j + 1, n - i + 1]
 
-            #Don't flip if it would make a loop
-            #Don't flip if col is already regular
-            if i != j && degreeDict[j] != k
-                #If already flipped, continue
-                if position == 1
-                    continue
-                end
-
-                #Flip if connection or inverse position is already flipped
-                if connection == 1 || inv_position == 1
-                    adj_mat[inv_row, inv_col] = 1
-                    degreeDict[inv_row] = 1
-                    adj_mat[i, j] = 1
-                    degreeDict[i] += 1
-                end
-                #TODO Other conditions for flip
+            
                 #TODO make check3 with https://en.wikipedia.org/wiki/Seidel_adjacency_matrix
             else
                 continue
